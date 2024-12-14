@@ -10,9 +10,9 @@ import "./SidebarMenu.css";
 const { Sider } = Layout;
 
 const sessions = {
-  training: { id: 'c6b11fef-3aaf-475c-9c17-5bf587438f84', name: 'Training Server' },
-  casual: { id: 'ef55b332-8847-47eb-8846-e27bdf8a673b', name: 'Casual Server' },
-  expert: { id: '99917fd2-bea4-485d-b83e-5094628f33e5', name: 'Expert Server' }
+  training: { id: '9ed5512e-b6eb-401f-bab8-42bdbdcf2bab', name: 'Training Server' }, // version 24.4
+  casual: { id: '7e4681bf-9fee-4c68-ba62-eda1f2f0e780', name: 'Casual Server' }, // version 24.4
+  expert: { id: '9bdfef34-f03b-4413-b8fa-c29949bb18f8', name: 'Expert Server' } // version 24.4
 };
 
 export const SidebarMenu = () => {

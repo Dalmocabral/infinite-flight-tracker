@@ -24,19 +24,11 @@ const Menulist = ({ onSelectServer, toggleSidebar }) => {
       </Menu.SubMenu>
       <Menu.Item key="toggleinfo" icon={<FaEarthAmericas />} onClick={toggleSidebar}>
         Toggle Info
-      </Menu.Item>
-      <Menu.Item key="pilots" icon={<FaPlane />}>
-        Pilots
-      </Menu.Item>
-      <Menu.Item key="atc" icon={<FaSatelliteDish />}>
-        ATC
-      </Menu.Item>
+      </Menu.Item>      
       <Menu.Item key="setting" icon={<FaGear />}>
         Settings
       </Menu.Item>
-      <Menu.Item key="login" icon={<FaRightFromBracket />}>
-        Login
-      </Menu.Item>
+      
     </Menu>
   );
 };
