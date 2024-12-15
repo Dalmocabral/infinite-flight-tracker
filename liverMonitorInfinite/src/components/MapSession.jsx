@@ -12,7 +12,15 @@ const MapSession = ({ sessionId, onIconClick }) => {
   const [currentPolyline, setCurrentPolyline] = useState([]);
   const [flightPlanPolyline, setFlightPlanPolyline] = useState([]);
 
+  // Recuperar dados salvos localmente
+  const savedUsername = localStorage.getItem('formUsername'); // Nome do usuário salvo
+  const savedVAName = localStorage.getItem('vaName'); // Nome da VA salvo (opcional)
+  console.log('O nome que está retornado do localStorage: ', savedUsername);
+  console.log('VA/VO retornado do localStorage: ', savedVAName);
+
   useEffect(() => {
+
+
     const fetchFlights = async () => {
       try {
         const flightData = await ApiService.getFlightData(sessionId);
@@ -23,10 +31,24 @@ const MapSession = ({ sessionId, onIconClick }) => {
 
         // Process each flight data
         flightData.forEach(flight => {
-          const { latitude, longitude, heading, flightId } = flight;
+          const { latitude, longitude, heading, username, virtualOrganization } = flight;
 
           const el = document.createElement('div');
-          el.className = 'airplane-icon';
+
+          // Verifica se o usuário está online e retorna o ícone apropriado
+          if (!username || username === null) {
+            el.className = 'airplane-icon'; // Ícone padrão para usuários offline ou nulos
+          } else if (username === savedUsername) {
+            el.className = 'special-airplane-icon'; // Ícone especial para o usuário atual
+          } else if (virtualOrganization && virtualOrganization === savedVAName) {
+            el.className = 'va-airplane-icon'; // Ícone especial para a VA do usuário
+          } else {
+            el.className = 'airplane-icon'; // Ícone padrão para outros casos
+          }
+
+          // Rotacionar o ícone com base no heading
+          el.style.transform = `rotate(${heading}deg)`;
+
           el.addEventListener('click', async () => {
             // Remove existing polyline layers
             removePolylines();
@@ -35,7 +57,7 @@ const MapSession = ({ sessionId, onIconClick }) => {
 
             try {
               // Fetch and render route polyline
-              const route = await ApiService.getRoute(sessionId, flightId);
+              const route = await ApiService.getRoute(sessionId, flight.flightId);
               if (route) {
                 let coordinates = route.map(point => [point.longitude, point.latitude]);
 
@@ -74,56 +96,12 @@ const MapSession = ({ sessionId, onIconClick }) => {
 
                 setCurrentPolyline(newPolyline);
               }
-
-              // Fetch and render flight plan polyline
-              const flightPlan = await ApiService.getFlightPlan(sessionId, flightId);
-              if (flightPlan && flightPlan.result && flightPlan.result.flightPlanItems) {
-                const flightPlanCoordinates = extractCoordinates(flightPlan.result.flightPlanItems);
-
-                if (flightPlanCoordinates.length > 0) {
-                  // Correct for the International Date Line
-                  const correctedFlightPlanCoordinates = splitLineAtDateLine(flightPlanCoordinates);
-
-                  // Add flight plan polyline
-                  const newFlightPlanPolyline = [];
-                  correctedFlightPlanCoordinates.forEach((segment, index) => {
-                    const layerId = `flight-plan-route-segment-${index}`;
-                    map.current.addSource(layerId, {
-                      type: 'geojson',
-                      data: {
-                        type: 'Feature',
-                        geometry: {
-                          type: 'LineString',
-                          coordinates: segment,
-                        }
-                      }
-                    });
-
-                    map.current.addLayer({
-                      id: layerId,
-                      type: 'line',
-                      source: layerId,
-                      paint: {
-                        'line-color': 'black',
-                        'line-width': 1,
-                        'line-dasharray': [4, 2],
-                      }
-                    });
-                    newFlightPlanPolyline.push(layerId);
-                  });
-
-                  setFlightPlanPolyline(newFlightPlanPolyline);
-                } else {
-                  console.error('No coordinates found in flight plan.');
-                }
-              } else {
-                console.error('Flight plan is empty or malformed.');
-              }
             } catch (error) {
-              console.error('Error fetching route or flight plan:', error);
+              console.error('Error fetching route:', error);
             }
           });
 
+          // Cria o marcador no mapa
           const marker = new maplibregl.Marker({ element: el })
             .setLngLat([longitude, latitude])
             .addTo(map.current);
@@ -144,7 +122,7 @@ const MapSession = ({ sessionId, onIconClick }) => {
         zoom: 2,
       });
 
-      // Add click event to map to clear polyline layers
+      // Adicionar evento de clique no mapa para limpar polylines
       map.current.on('click', () => {
         removePolylines();
       });
@@ -155,7 +133,7 @@ const MapSession = ({ sessionId, onIconClick }) => {
     return () => clearInterval(intervalId);
   }, [sessionId, onIconClick]);
 
-  // Function to remove existing polylines
+  // Função para remover polylines
   const removePolylines = () => {
     if (currentPolyline.length > 0) {
       currentPolyline.forEach((layerId) => {
@@ -182,7 +160,7 @@ const MapSession = ({ sessionId, onIconClick }) => {
     }
   };
 
-  // Function to split the line at the International Date Line
+  // Função para dividir linha na linha internacional de mudança de data
   const splitLineAtDateLine = (points) => {
     let splitLines = [];
     let currentLine = [points[0]];
@@ -203,27 +181,6 @@ const MapSession = ({ sessionId, onIconClick }) => {
 
     splitLines.push(currentLine);
     return splitLines;
-  };
-
-  // Function to extract coordinates from flight plan items
-  const extractCoordinates = (items) => {
-    let coordinates = [];
-
-    items.forEach(item => {
-      if (item.location && item.location.latitude && item.location.longitude) {
-        coordinates.push([item.location.longitude, item.location.latitude]);
-      }
-
-      if (item.children && item.children.length > 0) {
-        item.children.forEach(child => {
-          if (child.location && child.location.latitude && child.location.longitude) {
-            coordinates.push([child.location.longitude, child.location.latitude]);
-          }
-        });
-      }
-    });
-
-    return coordinates;
   };
 
   return (

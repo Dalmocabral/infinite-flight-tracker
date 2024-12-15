@@ -94,9 +94,11 @@ const vaOptions = ['(selecione uma opção)',
 const Menulist = ({ onSelectServer, toggleSidebar }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false); // Controle do popup
   const [formData, setFormData] = useState({
-    username: "",
+    formUsername: "",
     vaVo: "",
   });
+
+  console.log(formData);
 
   // Funções para abrir e fechar o popup
   const handleOpenDialog = () => setIsDialogOpen(true);
@@ -107,21 +109,30 @@ const Menulist = ({ onSelectServer, toggleSidebar }) => {
     const { name, value } = event.target;
     const updatedFormData = { ...formData, [name]: value };
     setFormData(updatedFormData);
-    localStorage.setItem("userFormData", JSON.stringify(updatedFormData)); // Salva os dados no Local Storage
+
+    // Salva os dados no Local Storage
+    localStorage.setItem("formUsername", updatedFormData.formUsername); // Alterado aqui
+    localStorage.setItem("vaName", updatedFormData.vaVo); // Alterado aqui
   };
 
   // Recupera os dados do Local Storage ao carregar o componente
   useEffect(() => {
     const savedData = localStorage.getItem("userFormData");
+    //console.log('teste 1', savedData)
     if (savedData) {
       setFormData(JSON.parse(savedData)); // Recupera e define os dados no estado
+      
     }
   }, []);
 
   const handleFormSubmit = () => {
-    console.log("Dados do formulário salvos:", formData);
-    setIsDialogOpen(false); // Fecha o popup após salvar
+    localStorage.setItem("userFormData", JSON.stringify(formData));
+    // Fecha o diálogo
+    setIsDialogOpen(false);
+    // Recarrega a página
+    window.location.reload();
   };
+  
 
   return (
     <>
@@ -154,8 +165,8 @@ const Menulist = ({ onSelectServer, toggleSidebar }) => {
           {/* Campo Username IFC */}
           <TextField
             label="Username IFC"
-            name="username"
-            value={formData.username}
+            name="formUsername"
+            value={formData.formUsername}
             onChange={handleChange}
             fullWidth
             margin="normal"

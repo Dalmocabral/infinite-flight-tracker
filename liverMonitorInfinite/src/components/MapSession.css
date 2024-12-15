@@ -20,7 +20,7 @@ html, body {
 .airplane-icon {
     width: 32px;
     height: 32px;
-    background-image: url('../assets/airplane.png'); /* URL do ícone */
+    background-image: url('../assets/airplane_user.png'); /* URL do ícone */
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -40,3 +40,19 @@ html, body {
     font-family: Arial, sans-serif;
     z-index: 1000;
 }
+
+  
+  .special-airplane-icon {
+    background-image: url('../assets/airplane.png');
+    background-size: cover;
+    width: 30px;
+    height: 30px;
+  }
+  
+  .va-airplane-icon {
+    background-image: url('../assets/airplane_va_vo.png');
+    background-size: cover;
+    width: 30px;
+    height: 30px;
+  }
+  
