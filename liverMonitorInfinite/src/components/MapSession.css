@@ -63,3 +63,15 @@ html, body {
     height: 30px;
   }
   
+  .staff-airplane-icon {
+    background-image: url('../assets/airplane_staff.png'); /* Ícone para usuários staff */
+    background-size: cover;
+    width: 30px;
+    height: 30px;
+  }
+
+  .username-large {
+    font-size: 1.5rem; /* Tamanho da fonte - ajuste conforme necessário */
+    font-weight: bold; /* Deixa o texto em negrito */
+    
+  }

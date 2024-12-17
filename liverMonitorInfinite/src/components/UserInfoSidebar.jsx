@@ -8,6 +8,8 @@ import defaultImage from "../assets/ovni.png"; // Imagem padrão
 import { CiPaperplane } from "react-icons/ci";
 import { IoIosAirplane } from "react-icons/io";
 import { FaYoutube, FaTwitch } from "react-icons/fa6"; // Importar ícones
+import staffList from "./Staff.json";
+import { FaShieldAlt } from "react-icons/fa"; // Ícone de escudo
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371e3; // Raio da Terra em metros
@@ -143,6 +145,7 @@ const convertMinutesToHHMM = (minutes) => {
   };
 
   const streamer = stremeruser.find((user) => user.username === flightData.username);
+  const isStaff = staffList.some((staff) => staff.username === flightData.username);
 
   return (
     <div className={`user-info-sidebar ${isVisible ? 'visible' : ''}`} ref={ref} onClick={handleClickInside}>
@@ -219,7 +222,7 @@ const convertMinutesToHHMM = (minutes) => {
         </div>
       </div>
       <div className="inforusername">
-        <span>{flightData.username}</span>
+      <span className="username-large">{flightData.username}   {isStaff && <FaShieldAlt className="staff-icon" />} {/* Ícone de escudo */}</span>
         {streamer && (
           <span className="stream-icons">
             {streamer.twitch && <a href={streamer.twitch} target="_blank" rel="noopener noreferrer"><FaTwitch className="stream-icon" /></a>}
