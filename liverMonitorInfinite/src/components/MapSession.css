@@ -75,3 +75,10 @@ html, body {
     font-weight: bold; /* Deixa o texto em negrito */
     
   }
+
+  .custom-aircraft-icon {
+    background-image: url('../assets/airplane_ge.png'); /* Ícone para usuários staff */
+    background-size: cover;
+    width: 20px;
+    height: 20px;
+  }

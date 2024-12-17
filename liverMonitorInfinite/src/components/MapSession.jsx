@@ -7,6 +7,8 @@ import ZuluClock from './ZuluClock';
 import ApiService from './ApiService';
 import stremerData from './stremer.json'; // Importar o arquivo JSON
 import staffData from './staff.json'; // Importar o arquivo JSON dos staffs
+import dataSetIconAircraft from './dataSetIconAircraft.json';
+
 
 const MapSession = ({ sessionId, onIconClick }) => {
   const mapContainer = useRef(null);
@@ -32,7 +34,7 @@ const MapSession = ({ sessionId, onIconClick }) => {
 
         // Processar dados de cada voo
         flightData.forEach(flight => {
-          const { latitude, longitude, heading, username, virtualOrganization } = flight;
+          const { latitude, longitude, heading, username, virtualOrganization, aircraftId } = flight;
 
           const el = document.createElement('div');
 
@@ -42,7 +44,10 @@ const MapSession = ({ sessionId, onIconClick }) => {
           // Verificar se o username está no staff.json
           const isStaff = staffData.some(staff => staff.username === username);
 
-          // Determinar a classe do ícone com base no status
+          // Comparar o aircraftId com o dataSetIconAircraft.json
+          const aircraft = dataSetIconAircraft.GA.find(ac => ac.id === aircraftId);
+
+          // Determinar o ícone do avião
           if (!username || username === null) {
             el.className = 'airplane-icon';
           } else if (username === savedUsername) {
@@ -52,10 +57,13 @@ const MapSession = ({ sessionId, onIconClick }) => {
           } else if (streamer && (streamer.twitch || streamer.youtube)) {
             el.className = 'online-airplane-icon';
           } else if (isStaff) {
-            el.className = 'staff-airplane-icon'; // Novo ícone para staff
+            el.className = 'staff-airplane-icon'; // Ícone para staff
+          } else if (aircraft) {   
+            el.className = 'custom-aircraft-icon'; // Classe personalizada para aviões específicos
           } else {
             el.className = 'airplane-icon';
           }
+
 
 
           el.style.transform = `rotate(${heading}deg)`;
