@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
+import maplibregl, { NavigationControl } from "maplibre-gl"; // Importe NavigationControl
+
 import '@maptiler/sdk/dist/maptiler-sdk.css';
 import "./MapSession.css";
 import ZuluClock from './ZuluClock';
@@ -143,6 +144,10 @@ const MapSession = ({ sessionId, onIconClick }) => {
         zoom: 2,
       });
 
+      // Adicionar controles de navegação (Zoom In e Zoom Out)
+      const navControl = new NavigationControl(); // Cria o controle de navegação
+      map.current.addControl(navControl, 'bottom-right'); // Adiciona os controles no canto superior direito
+
       // Adicionar evento de clique no mapa para limpar polilinhas
       map.current.on('click', () => {
         console.log("Mapa clicado, removendo polilinhas...");
@@ -165,31 +170,34 @@ const MapSession = ({ sessionId, onIconClick }) => {
   // Função para remover polilinhas
   const removePolylines = () => {
     console.log("Removendo polilinhas...");
-
+  
     currentPolyline.forEach((layerId) => {
       if (map.current.getLayer(layerId)) {
         map.current.removeLayer(layerId);
-        console.log(`Layer removido: ${layerId}`);
+        //console.log(`Layer removido: ${layerId}`);
       }
       if (map.current.getSource(layerId)) {
         map.current.removeSource(layerId);
-        console.log(`Source removido: ${layerId}`);
+        //console.log(`Source removido: ${layerId}`);
       }
     });
+  
     setCurrentPolyline([]);
-
+  
     flightPlanPolyline.forEach((layerId) => {
       if (map.current.getLayer(layerId)) {
         map.current.removeLayer(layerId);
-        console.log(`Layer removido: ${layerId}`);
+        //console.log(`Layer removido: ${layerId}`);
       }
       if (map.current.getSource(layerId)) {
         map.current.removeSource(layerId);
-        console.log(`Source removido: ${layerId}`);
+        //console.log(`Source removido: ${layerId}`);
       }
     });
+  
     setFlightPlanPolyline([]);
   };
+  
 
   // Função para dividir linha na Linha Internacional de Data
   const splitLineAtDateLine = (points) => {

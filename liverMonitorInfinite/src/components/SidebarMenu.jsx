@@ -59,6 +59,8 @@ export const SidebarMenu = () => {
     }
   };
 
+  
+
   // Toggles the visibility of the SessionInfoSidebar
   // Alterna a visibilidade do SessionInfoSidebar
   const toggleSidebar = () => {
