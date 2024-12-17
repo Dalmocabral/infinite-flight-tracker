@@ -3,6 +3,9 @@ import { Menu } from "antd";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import { FaEarthAmericas, FaGear, FaServer } from "react-icons/fa6";
 
+
+
+// Lista de opções de VA/VO
 const vaOptions = ['(selecione uma opção)',
   'Aegean Virtual [AEVA]',
   'Aerolíneas Argentinas Virtual [ARVA]',
@@ -92,53 +95,66 @@ const vaOptions = ['(selecione uma opção)',
 ];
 
 const Menulist = ({ onSelectServer, toggleSidebar }) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // Controle do popup
+  // Estado para controle do diálogo (popup)
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Estado para os dados do formulário
   const [formData, setFormData] = useState({
     formUsername: "",
     vaVo: "",
   });
 
-  console.log(formData);
-
-  // Funções para abrir e fechar o popup
+  /**
+   * Abre o diálogo (popup).
+   */
   const handleOpenDialog = () => setIsDialogOpen(true);
+
+  /**
+   * Fecha o diálogo (popup).
+   */
   const handleCloseDialog = () => setIsDialogOpen(false);
 
-  // Lida com mudanças no formulário
+  /**
+   * Atualiza os valores do formulário e salva no Local Storage.
+   * Updates form values and saves them to Local Storage.
+   */
   const handleChange = (event) => {
     const { name, value } = event.target;
     const updatedFormData = { ...formData, [name]: value };
     setFormData(updatedFormData);
 
     // Salva os dados no Local Storage
-    localStorage.setItem("formUsername", updatedFormData.formUsername); // Alterado aqui
-    localStorage.setItem("vaName", updatedFormData.vaVo); // Alterado aqui
+    localStorage.setItem("formUsername", updatedFormData.formUsername);
+    localStorage.setItem("vaName", updatedFormData.vaVo);
   };
 
-  // Recupera os dados do Local Storage ao carregar o componente
+  /**
+   * Recupera os dados salvos no Local Storage ao carregar o componente.
+   * Fetches saved data from Local Storage when the component loads.
+   */
   useEffect(() => {
     const savedData = localStorage.getItem("userFormData");
-    //console.log('teste 1', savedData)
     if (savedData) {
-      setFormData(JSON.parse(savedData)); // Recupera e define os dados no estado
-      
+      setFormData(JSON.parse(savedData));
     }
   }, []);
 
+  /**
+   * Salva os dados do formulário no Local Storage e recarrega a página.
+   * Saves form data to Local Storage and reloads the page.
+   */
   const handleFormSubmit = () => {
     localStorage.setItem("userFormData", JSON.stringify(formData));
-    // Fecha o diálogo
-    setIsDialogOpen(false);
-    // Recarrega a página
-    window.location.reload();
+    setIsDialogOpen(false); // Fecha o diálogo
+    window.location.reload(); // Recarrega a página
   };
-  
 
   return (
     <>
       {/* Menu principal */}
       <Menu theme="dark" className="menu-bar">
         <Menu.SubMenu key="server" icon={<FaServer />} title="Servers">
+          {/* Opções de servidores */}
           <Menu.Item key="casual" onClick={() => onSelectServer("casual")}>
             Casual server
           </Menu.Item>
@@ -149,20 +165,21 @@ const Menulist = ({ onSelectServer, toggleSidebar }) => {
             Expert server
           </Menu.Item>
         </Menu.SubMenu>
+        {/* Botão para alternar informações */}
         <Menu.Item key="toggleinfo" icon={<FaEarthAmericas />} onClick={toggleSidebar}>
           Toggle Info
         </Menu.Item>
-        {/* Botão Settings abre o popup */}
+        {/* Botão para abrir configurações */}
         <Menu.Item key="setting" icon={<FaGear />} onClick={handleOpenDialog}>
           Settings
         </Menu.Item>
       </Menu>
 
-      {/* Popup com Formulário */}
+      {/* Popup de configurações */}
       <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
         <DialogTitle>Settings</DialogTitle>
         <DialogContent>
-          {/* Campo Username IFC */}
+          {/* Campo para Username IFC */}
           <TextField
             label="Username IFC"
             name="formUsername"
@@ -171,7 +188,7 @@ const Menulist = ({ onSelectServer, toggleSidebar }) => {
             fullWidth
             margin="normal"
           />
-          {/* Campo VA/VO com Dropdown */}
+          {/* Campo para selecionar VA/VO */}
           <FormControl fullWidth margin="normal">
             <InputLabel id="va-vo-label">VA/VO</InputLabel>
             <Select
@@ -189,7 +206,7 @@ const Menulist = ({ onSelectServer, toggleSidebar }) => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          {/* Botões do rodapé */}
+          {/* Botões do rodapé do diálogo */}
           <Button onClick={handleCloseDialog} color="error">
             Cancelar
           </Button>

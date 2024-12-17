@@ -56,3 +56,10 @@ html, body {
     height: 30px;
   }
   
+  .online-airplane-icon {
+    background-image: url('../assets/airplane_stremer.png'); /* Ícone para usuários online */
+    background-size: cover;
+    width: 30px;
+    height: 30px;
+  }
+  

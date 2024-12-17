@@ -4,6 +4,7 @@ import '@maptiler/sdk/dist/maptiler-sdk.css';
 import "./MapSession.css";
 import ZuluClock from './ZuluClock';
 import ApiService from './ApiService';
+import stremerData from './stremer.json'; // Importar o arquivo JSON
 
 const MapSession = ({ sessionId, onIconClick }) => {
   const mapContainer = useRef(null);
@@ -13,64 +14,79 @@ const MapSession = ({ sessionId, onIconClick }) => {
   const [flightPlanPolyline, setFlightPlanPolyline] = useState([]);
 
   // Recuperar dados salvos localmente
-  const savedUsername = localStorage.getItem('formUsername'); // Nome do usuário salvo
-  const savedVAName = localStorage.getItem('vaName'); // Nome da VA salvo (opcional)
-  console.log('O nome que está retornado do localStorage: ', savedUsername);
-  console.log('VA/VO retornado do localStorage: ', savedVAName);
+  const savedUsername = localStorage.getItem('formUsername');
+  const savedVAName = localStorage.getItem('vaName');
+  console.log('LocalStorage username:', savedUsername);
+  console.log('LocalStorage VA/VO:', savedVAName);
 
   useEffect(() => {
-
-
     const fetchFlights = async () => {
       try {
         const flightData = await ApiService.getFlightData(sessionId);
 
-        // Remove existing markers
+        // Remover marcadores existentes
         markers.current.forEach(marker => marker.remove());
         markers.current = [];
 
-        // Process each flight data
+        // Processar dados de cada voo
         flightData.forEach(flight => {
           const { latitude, longitude, heading, username, virtualOrganization } = flight;
 
           const el = document.createElement('div');
 
-          // Verifica se o usuário está online e retorna o ícone apropriado
+          // Verificar se o username está online no stremer.json
+          const streamer = stremerData.find(st => st.username === username);
+          
+          // Determinar a classe do ícone com base no status de online
           if (!username || username === null) {
-            el.className = 'airplane-icon'; // Ícone padrão para usuários offline ou nulos
+            el.className = 'airplane-icon';
           } else if (username === savedUsername) {
-            el.className = 'special-airplane-icon'; // Ícone especial para o usuário atual
+            el.className = 'special-airplane-icon';
           } else if (virtualOrganization && virtualOrganization === savedVAName) {
-            el.className = 'va-airplane-icon'; // Ícone especial para a VA do usuário
+            el.className = 'va-airplane-icon';
+          } else if (streamer && (streamer.twitch || streamer.youtube)) {
+            el.className = 'online-airplane-icon';
           } else {
-            el.className = 'airplane-icon'; // Ícone padrão para outros casos
+            el.className = 'airplane-icon';
           }
 
-          // Rotacionar o ícone com base no heading
           el.style.transform = `rotate(${heading}deg)`;
 
           el.addEventListener('click', async () => {
-            // Remove existing polyline layers
+            console.log("Ícone do avião clicado, removendo polilinhas...");
             removePolylines();
-
+          
             onIconClick(flight);
-
+          
             try {
-              // Fetch and render route polyline
               const route = await ApiService.getRoute(sessionId, flight.flightId);
-              if (route) {
+          
+              if (route && route.length > 0) {
+                console.log("Dados da rota recebidos:", route);
+          
+                // Converter os dados da rota em coordenadas
                 let coordinates = route.map(point => [point.longitude, point.latitude]);
-
-                // Add current position as the last point
+          
+                // Garantir que o ponto final (posição atual do avião) seja adicionado
                 coordinates.push([longitude, latitude]);
-
-                // Correct for the International Date Line
+          
+                // Dividir a linha na Linha Internacional de Data, se necessário
                 const correctedCoordinates = splitLineAtDateLine(coordinates);
-
-                // Add route polyline
+          
                 const newPolyline = [];
+          
                 correctedCoordinates.forEach((segment, index) => {
                   const layerId = `flight-route-segment-${index}`;
+                  
+                  // Verificar se a camada já existe antes de adicionar
+                  if (map.current.getLayer(layerId)) {
+                    map.current.removeLayer(layerId);
+                  }
+                  if (map.current.getSource(layerId)) {
+                    map.current.removeSource(layerId);
+                  }
+          
+                  // Adicionar fonte GeoJSON
                   map.current.addSource(layerId, {
                     type: 'geojson',
                     data: {
@@ -81,7 +97,8 @@ const MapSession = ({ sessionId, onIconClick }) => {
                       }
                     }
                   });
-
+          
+                  // Adicionar camada da linha
                   map.current.addLayer({
                     id: layerId,
                     type: 'line',
@@ -91,17 +108,21 @@ const MapSession = ({ sessionId, onIconClick }) => {
                       'line-width': 2,
                     }
                   });
+          
                   newPolyline.push(layerId);
                 });
-
+          
+                // Salvar as novas polilinhas no estado
                 setCurrentPolyline(newPolyline);
+                console.log("Polilinhas adicionadas:", newPolyline);
+              } else {
+                console.warn("Nenhum dado de rota retornado.");
               }
             } catch (error) {
-              console.error('Error fetching route:', error);
+              console.error('Erro ao buscar rota:', error);
             }
           });
-
-          // Cria o marcador no mapa
+          
           const marker = new maplibregl.Marker({ element: el })
             .setLngLat([longitude, latitude])
             .addTo(map.current);
@@ -122,8 +143,9 @@ const MapSession = ({ sessionId, onIconClick }) => {
         zoom: 2,
       });
 
-      // Adicionar evento de clique no mapa para limpar polylines
+      // Adicionar evento de clique no mapa para limpar polilinhas
       map.current.on('click', () => {
+        console.log("Mapa clicado, removendo polilinhas...");
         removePolylines();
       });
     }
@@ -133,34 +155,43 @@ const MapSession = ({ sessionId, onIconClick }) => {
     return () => clearInterval(intervalId);
   }, [sessionId, onIconClick]);
 
-  // Função para remover polylines
-  const removePolylines = () => {
-    if (currentPolyline.length > 0) {
-      currentPolyline.forEach((layerId) => {
-        if (map.current.getLayer(layerId)) {
-          map.current.removeLayer(layerId);
-        }
-        if (map.current.getSource(layerId)) {
-          map.current.removeSource(layerId);
-        }
-      });
-      setCurrentPolyline([]);
+  // Remover polilinhas ao mudar de servidor
+  useEffect(() => {
+    if (map.current) {
+      removePolylines();
     }
+  }, [sessionId]);
 
-    if (flightPlanPolyline.length > 0) {
-      flightPlanPolyline.forEach((layerId) => {
-        if (map.current.getLayer(layerId)) {
-          map.current.removeLayer(layerId);
-        }
-        if (map.current.getSource(layerId)) {
-          map.current.removeSource(layerId);
-        }
-      });
-      setFlightPlanPolyline([]);
-    }
+  // Função para remover polilinhas
+  const removePolylines = () => {
+    console.log("Removendo polilinhas...");
+
+    currentPolyline.forEach((layerId) => {
+      if (map.current.getLayer(layerId)) {
+        map.current.removeLayer(layerId);
+        console.log(`Layer removido: ${layerId}`);
+      }
+      if (map.current.getSource(layerId)) {
+        map.current.removeSource(layerId);
+        console.log(`Source removido: ${layerId}`);
+      }
+    });
+    setCurrentPolyline([]);
+
+    flightPlanPolyline.forEach((layerId) => {
+      if (map.current.getLayer(layerId)) {
+        map.current.removeLayer(layerId);
+        console.log(`Layer removido: ${layerId}`);
+      }
+      if (map.current.getSource(layerId)) {
+        map.current.removeSource(layerId);
+        console.log(`Source removido: ${layerId}`);
+      }
+    });
+    setFlightPlanPolyline([]);
   };
 
-  // Função para dividir linha na linha internacional de mudança de data
+  // Função para dividir linha na Linha Internacional de Data
   const splitLineAtDateLine = (points) => {
     let splitLines = [];
     let currentLine = [points[0]];

@@ -9,37 +9,53 @@ import {
 } from "@mui/material";
 
 const PopupForm = () => {
-  const [open, setOpen] = useState(false);
+  // Estado para controlar a abertura do popup
+  // State to control the popup's open state
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Estado para armazenar os dados do formulário
+  // State to store form data
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    name: "", // Nome do usuário / User's name
+    email: "", // Email do usuário / User's email
   });
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  // Função para abrir o popup
+  // Function to open the popup
+  const handleOpen = () => setIsOpen(true);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  // Função para fechar o popup
+  // Function to close the popup
+  const handleClose = () => setIsOpen(false);
+
+  // Função para lidar com mudanças nos campos do formulário
+  // Function to handle form field changes
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  // Função para enviar os dados do formulário
+  // Function to submit the form data
   const handleSubmit = () => {
-    console.log("Form Data:", formData);
-    handleClose(); // Fecha o popup após o envio
+    console.log("Dados do Formulário:", formData); // Exibe os dados no console / Logs form data
+    handleClose(); // Fecha o popup após o envio / Closes the popup after submission
   };
 
   return (
     <div>
-      {/* Botão que abre o popup */}
+      {/* Botão para abrir o popup */}
+      {/* Button to open the popup */}
       <Button variant="contained" onClick={handleOpen}>
         Abrir Formulário
       </Button>
 
       {/* Popup (Dialog) */}
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog open={isOpen} onClose={handleClose}>
+        {/* Título do popup / Popup title */}
         <DialogTitle>Preencha o Formulário</DialogTitle>
         <DialogContent>
-          {/* Formulário */}
+          {/* Campo para o nome / Field for the name */}
           <TextField
             label="Nome"
             name="name"
@@ -48,6 +64,7 @@ const PopupForm = () => {
             fullWidth
             margin="normal"
           />
+          {/* Campo para o e-mail / Field for the email */}
           <TextField
             label="E-mail"
             name="email"
@@ -59,10 +76,11 @@ const PopupForm = () => {
           />
         </DialogContent>
         <DialogActions>
-          {/* Botões no rodapé do popup */}
+          {/* Botão para cancelar / Cancel button */}
           <Button onClick={handleClose} color="error">
             Cancelar
           </Button>
+          {/* Botão para enviar / Submit button */}
           <Button onClick={handleSubmit} variant="contained" color="primary">
             Enviar
           </Button>

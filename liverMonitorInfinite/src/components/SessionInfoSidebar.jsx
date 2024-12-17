@@ -1,95 +1,122 @@
 import React, { useEffect, useState } from "react";
 import { Chart } from "react-google-charts";
-import ApiService from './ApiService'; // Importe o objeto ApiService
+import ApiService from './ApiService'; // Importa o serviço de API / Imports the API service
 import "./SidebarMenu.css";
 import "./SessionInfoSidebar.css";
-import aircraftDataJson from "./GetAircraft.json"; // Importe o JSON local
+import aircraftDataJson from "./GetAircraft.json"; // Importa o JSON de aeronaves / Imports the aircraft JSON
 
 const SessionInfoSidebar = ({ sessionName, sessionId }) => {
+  // Estado para armazenar o número de usuários online
+  // State to store the number of online users
   const [userCount, setUserCount] = useState(null);
+
+  // Estado para armazenar os dados do gráfico de aeronaves
+  // State to store aircraft chart data
   const [aircraftData, setAircraftData] = useState([]);
+
+  // Estado para armazenar os dados dos aeroportos
+  // State to store airport data
   const [airports, setAirports] = useState([]);
+
+  // Estado para armazenar os dados do ATC
+  // State to store ATC data
   const [atcData, setAtcData] = useState([]);
 
-  // Fetch session data (user count)
+  // Busca o número de usuários na sessão
+  // Fetches the number of users in the session
   useEffect(() => {
     const fetchSessionData = async () => {
       try {
-        const sessionData = await ApiService.getSessionData(sessionId); // Use ApiService
+        const sessionData = await ApiService.getSessionData(sessionId);
         setUserCount(sessionData.userCount);
       } catch (error) {
-        console.error("Error fetching session data:", error);
+        console.error("Erro ao buscar dados da sessão:", error);
       }
     };
 
     fetchSessionData();
   }, [sessionId]);
 
-  // Fetch flight data (popular aircraft)
+  // Busca os dados de voos para popular o gráfico de aeronaves
+  // Fetches flight data to populate the aircraft chart
   useEffect(() => {
     const fetchFlightData = async () => {
       try {
-        const flightData = await ApiService.getFlightData(sessionId); // Use ApiService
+        const flightData = await ApiService.getFlightData(sessionId);
 
+        // Conta a quantidade de cada aeronave
+        // Counts the occurrences of each aircraft
         const aircraftCount = flightData.reduce((acc, flight) => {
           const { aircraftId } = flight;
           acc[aircraftId] = (acc[aircraftId] || 0) + 1;
           return acc;
         }, {});
 
+        // Mapeia os dados para o formato do gráfico
+        // Maps data into chart format
         const aircraftArray = Object.entries(aircraftCount)
           .map(([id, count]) => {
             const aircraft = aircraftDataJson.result.find((ac) => ac.id === id);
-            return [aircraft ? aircraft.name : "Unknown", count];
+            return [aircraft ? aircraft.name : "Desconhecido", count];
           })
           .sort((a, b) => b[1] - a[1])
           .slice(0, 5);
 
-        const chartData = [["Aircraft", "Count"], ...aircraftArray];
+        const chartData = [["Aeronave", "Quantidade"], ...aircraftArray];
         setAircraftData(chartData);
       } catch (error) {
-        console.error("Error fetching flight data:", error);
+        console.error("Erro ao buscar dados de voos:", error);
       }
     };
 
     fetchFlightData();
   }, [sessionId]);
 
-  // Fetch airport data (most popular airports)
+  // Busca os dados dos aeroportos mais populares
+  // Fetches data of the most popular airports
   useEffect(() => {
     const fetchAirportsData = async () => {
       try {
-        const airportData = await ApiService.getAirportData(sessionId); // Use ApiService
-        
-        const sortedAirports = airportData.sort((a, b) => b.inboundFlightsCount - a.inboundFlightsCount).slice(0, 5);
+        const airportData = await ApiService.getAirportData(sessionId);
+
+        // Ordena os aeroportos pelos voos de entrada
+        // Sorts airports by inbound flights
+        const sortedAirports = airportData
+          .sort((a, b) => b.inboundFlightsCount - a.inboundFlightsCount)
+          .slice(0, 5);
         setAirports(sortedAirports);
       } catch (error) {
-        console.error("Error fetching airport data:", error);
+        console.error("Erro ao buscar dados dos aeroportos:", error);
       }
     };
 
     fetchAirportsData();
   }, [sessionId]);
 
-  // Fetch ATC data
+  // Busca os dados de ATC
+  // Fetches ATC data
   useEffect(() => {
     const fetchAtcData = async () => {
       try {
-        const atcData = await ApiService.getAtcData(sessionId); // Use ApiService
+        const atcData = await ApiService.getAtcData(sessionId);
         setAtcData(atcData);
       } catch (error) {
-        console.error("Error fetching ATC data:", error);
+        console.error("Erro ao buscar dados de ATC:", error);
       }
     };
 
     fetchAtcData();
   }, [sessionId]);
 
+  // Obtém o rótulo do tipo de ATC
+  // Gets the ATC type label
   const getTypeLabel = (type) => {
     const typeLabels = ["grd", "twr", "unicom", "clr", "app", "dep", "ctr", "atis"];
     return typeLabels[type] || "";
   };
 
+  // Agrupa os dados de ATC por aeroporto
+  // Groups ATC data by airport
   const atcGroupedByAirport = atcData.reduce((acc, atc) => {
     const { airportName, type } = atc;
     const typeLabel = getTypeLabel(type);
@@ -104,26 +131,32 @@ const SessionInfoSidebar = ({ sessionName, sessionId }) => {
 
   return (
     <div className="session-info-sidebar">
+      {/* Cabeçalho da barra lateral / Sidebar header */}
       <div className="statistics-header">
         <h3>Infinite Monitor Live</h3>
         <p>1.1.0v Alpha</p>
       </div>
+
+      {/* Nome da sessão / Session name */}
       <div className="name-session">
         <h4>{sessionName}</h4>
       </div>
+
+      {/* Contagem de usuários / User count */}
       <div className="session-count-user">
         {userCount !== null ? (
           <p>
-            <span>{userCount}</span> Users Online
+            <span>{userCount}</span> Usuários Online
           </p>
         ) : (
-          <p>Loading...</p>
+          <p>Carregando...</p>
         )}
       </div>
 
+      {/* Gráfico de aeronaves / Aircraft chart */}
       <div className="chart-section">
         <div className="grafic-header">
-          <h4>5 Popular Aircraft</h4>
+          <h4>5 Aeronaves Populares</h4>
         </div>
         <div className="chart-container">
           {aircraftData.length > 1 ? (
@@ -132,12 +165,9 @@ const SessionInfoSidebar = ({ sessionName, sessionId }) => {
               data={aircraftData}
               options={{
                 pieHole: 0.4,
-                is3D: false,
                 backgroundColor: "transparent",
-                legend: {
-                  position: "none", // Remove a legenda
-                },
-                pieSliceText: "label", // Mostra apenas o nome na fatia
+                legend: { position: "none" },
+                pieSliceText: "label",
                 slices: {
                   0: { color: "#1f15af" },
                   1: { color: "#3f32f3" },
@@ -145,28 +175,26 @@ const SessionInfoSidebar = ({ sessionName, sessionId }) => {
                   3: { color: "#6d6cb6" },
                   4: { color: "#9a99cc" },
                 },
-                chartArea: {
-                  width: "100%",
-                  height: "100%",
-                },
+                chartArea: { width: "100%", height: "100%" },
               }}
-              width="200px" // Ajusta a largura do gráfico
-              height="200px" // Ajusta a altura do gráfico
+              width="200px"
+              height="200px"
             />
           ) : (
-            <p>Loading chart...</p>
+            <p>Carregando gráfico...</p>
           )}
         </div>
       </div>
 
+      {/* Tabela de aeroportos / Airports table */}
       <div className="statistics-section">
-        <h4>Most Popular Airports</h4>
+        <h4>Aeroportos Populares</h4>
         <div className="airport-table">
           <div className="airport-table-header">
-            <span className="labelInbound">Inbound</span>
-            <span className="labelOutbound">Outbound</span>
+            <span className="labelInbound">Entrada</span>
+            <span className="labelOutbound">Saída</span>
           </div>
-          {airports.map(airport => (
+          {airports.map((airport) => (
             <div key={airport.airportIcao} className="airport-stat">
               <span className="inbound">{airport.inboundFlightsCount}</span>
               <span className="airport">{airport.airportIcao}</span>
@@ -176,10 +204,11 @@ const SessionInfoSidebar = ({ sessionName, sessionId }) => {
         </div>
       </div>
 
+      {/* Status de ATC / ATC status */}
       <div className="statistics-section-atc">
-        <h4>ATC Status</h4>
+        <h4>Status de ATC</h4>
         <ul>
-          {Object.keys(atcGroupedByAirport).map(airport => (
+          {Object.keys(atcGroupedByAirport).map((airport) => (
             <li key={airport} className="airport-stat">
               <span className="airport">{airport}</span>
               <span className="atc-status">
