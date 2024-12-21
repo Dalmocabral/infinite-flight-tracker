@@ -226,6 +226,138 @@
         "LiveryName": "Delta Air Lines",
         "modelo": "Airbus A350",        
         "image": "https://i.ibb.co/Zg5NfPN/delta.png"
+    },
+    {
+        "id": "9b0e4d99-14c3-43fb-9536-d6e4e6d2a1ca",
+        "LiveryName": "Aerolineas Argentinas",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/ryKktmz/Aerolineas-Argentinas.png"
+    },
+    {
+        "id": "905bf7ee-c47c-4689-8400-bc04f35c910b",
+        "LiveryName": "Aeromexico",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/QQNzr0R/Aero-Mexico.png"
+    },
+    {
+        "id": "75ef1efc-125a-4b62-a326-4f881997fab7",
+        "LiveryName": "Air Canada",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/gMhC7xf/Air-Canada.png"
+    },
+    {
+        "id": "703ad87d-19f7-4bef-b28a-3a3d02ef9701",
+        "LiveryName": "Air China",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/gMhC7xf/Air-Canada.png"
+    },
+    {
+        "id": "2c6620af-260d-427a-8f5f-4bdefff26e86",
+        "LiveryName": "Air India Express",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/gMhC7xf/Air-Canada.png"
+    },
+    {
+        "id": "d3731843-942f-44b1-8bd4-ad5dc2943ee3",
+        "LiveryName": "Akasa Air",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/HYhqqXZ/Akasa-Air.png"
+    },
+    {
+        "id": "6d32e0f5-8d59-4b8b-9cce-d65ec941b1ca",
+        "LiveryName": "Alaska Airlines",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/9Wfb45s/Alaska-Airlines.png"
+    },
+    {
+        "id": "3993dc11-a093-4746-b1fd-dc545dd91e08",
+        "LiveryName": "American Airlines",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/gTMzS77/American-Airlines.png"
+    },
+    {
+        "id": "d097b8a7-df8b-4070-9235-fead93103211",
+        "LiveryName": "Batik Air Malaysia",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/gTMzS77/American-Airlines.png"
+    },
+    {
+        "id": "5982ecd2-47ea-42c0-a4c5-b1779c871192",
+        "LiveryName": "Boeing",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/DQjThX1/Boeing.png"
+    },
+    {
+        "id": "88583b09-bf49-441f-9302-3e94b281ecc8",
+        "LiveryName": "Buzz",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/YQLNQVP/Buzz.png"
+    },
+    {
+        "id": "85006276-5bd6-4fe0-bd95-2646e84d29a2",
+        "LiveryName": "Caribbean Airlines",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/qjJy5RK/Caribbean-Airlines.png"
+    },
+    {
+        "id": "98ba636c-3543-4ff8-b696-4e7c6b9ab1cb",
+        "LiveryName": "China Southern",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/JC4NxQ5/China-Southern.png"
+    },
+    {
+        "id": "1f6bc406-53ad-40d7-9041-ccd909d62dbc",
+        "LiveryName": "Ethiopian Airlines",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/Z1vGXgb/Ethiopian-Airines.png"
+    },
+    {
+        "id": "9d19c2c6-8fae-407b-8ccf-e6f4e58a03c3",
+        "LiveryName": "Fiji Airways",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/YB5hKCV/Fiji-Airways.png"
+    },
+    {
+        "id": "fd67a84f-b72a-4a95-a1d4-8c88845819ac",
+        "LiveryName": "Flair Airlines",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/ZgdrrK4/Flair-Airlines.png"
+    },
+    {
+        "id": "857408d0-690e-4554-9d25-1e6f732e07c3",
+        "LiveryName": "Flydubai",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/ZgdrrK4/Flair-Airlines.png"
+    },
+    {
+        "id": "c5762350-b947-4d42-8fe5-8731c1883d05",
+        "LiveryName": "Generic",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/9pKyw42/Generic.png"
+    },
+    {
+        "id": "0452d890-5f09-408d-a3b6-8214c6e9dab8",
+        "LiveryName": "Icelandair",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/vH9CR77/Icelandair.png"
+    },
+    {
+        "id": "c09c6eb9-0a5f-4716-b9e2-cd5a394d79ac",
+        "LiveryName": "Infinite Flight",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/GvvDyy3/Infinite-Flight.png"
+    },
+    {
+        "id": "7f56e49b-087a-4789-a5ac-90fd7fdabb6e",
+        "LiveryName": "Korean Air",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/CmLvptQ/Korean-Air.png"
+    },
+    {
+        "id": "6f5d9785-956a-47b9-93a7-615da0367b6e",
+        "LiveryName": "LOT Polish Airlines",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/nb5RzF0/LOT-Polish-Airlines.png"
     }
     
     
