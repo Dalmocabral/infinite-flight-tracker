@@ -358,6 +358,60 @@
         "LiveryName": "LOT Polish Airlines",
         "modelo": "Boeing 737-8 MAX",        
         "image": "https://i.ibb.co/nb5RzF0/LOT-Polish-Airlines.png"
+    },
+    {
+        "id": "df566544-7c1d-4765-a60f-53f254e8dbfa",
+        "LiveryName": "SunExpress",
+        "modelo": "Boeing 737-8 MAX",        
+        "image": "https://i.ibb.co/PQ95Y86/Sun-Express.png"
+    },
+    {
+        "id": "490646cd-ae2b-4771-8086-507785d0f64",
+        "LiveryName": "Air Canada",
+        "modelo": "E175",        
+        "image": "https://i.ibb.co/3vLB3wy/Air-Canada.png"
+    },
+    {
+        "id": "490646cd-ae2b-4771-8086-507785d0f64",
+        "LiveryName": "Air Canada",
+        "modelo": "E175",        
+        "image": "https://i.ibb.co/3vLB3wy/Air-Canada.png"
+    },
+    {
+        "id": "f7a85def-8298-45dc-a954-d0b9d4043cd8",
+        "LiveryName": "FedEx",
+        "modelo": "MD-11F",        
+        "image": "https://i.ibb.co/vDZYJXB/FedEx.png"
+    },
+    {
+        "id": "03949eb7-ff6a-4050-aaf6-511388690990",
+        "LiveryName": "Ethiopian Airlines",
+        "modelo": "777-200LR",        
+        "image": "https://i.ibb.co/st9qyPc/Ethiopian-Airines.png"
+    },
+    {
+        "id": "fccd0805-0c4d-4449-978d-78e776fca6a5",
+        "LiveryName": "TRIP Linhas Aereas",
+        "modelo": "E175",        
+        "image": "https://i.ibb.co/ZmhBj2X/TRIP-Linhas-Aereas.png"
+    },
+    {
+        "id": "f0d39f11-4022-4eac-b8c1-bd8d39f2476f",
+        "LiveryName": "Alitalia",
+        "modelo": "Boeing 777-200ER",        
+        "image": "https://i.ibb.co/RpcL65c/Alitalia.png"
+    },
+    {
+        "id": "f6dd5782-db80-4e45-8216-b2054adf63a2",
+        "LiveryName": "American Airlines",
+        "modelo": "Boeing 777-200ER",        
+        "image": "https://i.ibb.co/zXFH2t6/American-Airlines.png"
+    },
+    {
+        "id": "f923cd30-8685-4d6e-8c53-549e651ac2fd",
+        "LiveryName": "KLM - Orange Pride 100",
+        "modelo": "777-300ER",        
+        "image": "https://i.ibb.co/M6THdXj/KLM-Orange-Pride-100.png"
     }
     
     
