@@ -412,6 +412,36 @@
         "LiveryName": "KLM - Orange Pride 100",
         "modelo": "777-300ER",        
         "image": "https://i.ibb.co/M6THdXj/KLM-Orange-Pride-100.png"
+    },
+    {
+        "id": "dcf08a0b-72d0-4eff-aa8a-00ebf2ba16b5",
+        "LiveryName": "Azul",
+        "modelo": "E190",        
+        "image": "https://i.ibb.co/KzZytNf/azul.png"
+    },
+    {
+        "id": "5e4bda57-699f-4d39-a813-ca1427ede399",
+        "LiveryName": "Fuji Dream Airlines",
+        "modelo": "E175",        
+        "image": "https://i.ibb.co/9vkSjP9/Fuji-Dream-Airlines.png"
+    },
+    {
+        "id": "13eda18c-f8ce-45b3-8a46-10e188b34618",
+        "LiveryName": "Lufthansa",
+        "modelo": "Boeing 747-8",        
+        "image": "https://i.ibb.co/3dbnXd9/Lufthansa.png"
+    },
+    {
+        "id": "4599f1a5-6e3c-477c-a21e-95c8d0d8e1e8",
+        "LiveryName": "Black, Red & White",
+        "modelo": "TBM-930",        
+        "image": "https://i.ibb.co/gMLnsHW/Black-Red-White.png"
+    },
+    {
+        "id": "f766a865-a728-4b43-ac7b-0cec6d575a09",
+        "LiveryName": "Hi Fly",
+        "modelo": "Airbus A380",        
+        "image": "https://i.ibb.co/zQ5cxFZ/Hi-Fly.png"
     }
     
     
