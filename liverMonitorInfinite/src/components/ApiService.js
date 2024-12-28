@@ -79,6 +79,18 @@ const ApiService = {
       throw error;
     }
   },
+
+  // Novo método para consumir a API do logo de avião
+  getAirplaneLogoData: async () => {
+    try {
+      const url = 'https://raw.githubusercontent.com/Dalmocabral/logo_airplane_if_json/refs/heads/main/logo_aiplane_if_json';
+      const response = await axios.get(url);
+      return response.data; // Retorna o JSON do logo
+    } catch (error) {
+      console.error('Error fetching airplane logo data:', error);
+      throw error;
+    }
+  },
 };
 
 export default ApiService;

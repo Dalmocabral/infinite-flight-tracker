@@ -11,6 +11,7 @@ import { FaYoutube, FaTwitch } from "react-icons/fa6"; // Importar ícones
 import staffList from "./Staff.json";
 import { FaShieldAlt } from "react-icons/fa"; // Ícone de escudo
 
+
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371e3; // Raio da Terra em metros
   const φ1 = (lat1 * Math.PI) / 180;
@@ -18,7 +19,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const Δφ = ((lat2 - lat1) * Math.PI) / 180;
   const Δλ = ((lon1 - lon2) * Math.PI) / 180;
 
-  const a = 
+  const a =
     Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
     Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
@@ -43,15 +44,38 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
   const [waypoints, setWaypoints] = useState([]);
   const [userStatus, setUserStatus] = useState({ xp: 0, grade: "N/A", flightTime: "0:00" });
   const [progress, setProgress] = useState(0);
+  const [airplaneLogos, setAirplaneLogos] = useState([]); // Estado para armazenar os dados da API
+
+
+
+  const fetchAirplaneLogoData = async () => {
+    try {
+      const data = await ApiService.getAirplaneLogoData();
+      setAirplaneLogos(data); // Armazena os dados do logo no estado
+    } catch (error) {
+      console.error("Erro ao buscar os logos dos aviões:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAirplaneLogoData();
+  }, []);
+
+  const getLiveryLogo = () => {
+    const matchingLogo = airplaneLogos.find(logo => logo.LiveryId === flightData.liveryId);
+    return matchingLogo ? matchingLogo.Logo : null;
+  };
+
+  const logoUrl = getLiveryLogo();
 
 
   // Função para converter minutos em formato HH:mm
-const convertMinutesToHHMM = (minutes) => {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
-};
-  
+  const convertMinutesToHHMM = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
+  };
+
 
   useEffect(() => {
     const fetchFlightPlan = async () => {
@@ -128,7 +152,7 @@ const convertMinutesToHHMM = (minutes) => {
         setUserStatus({
           xp: status.xp || 0,
           grade: status.grade || "N/A",
-          flightTime:convertMinutesToHHMM(status.flightTime) || "0:00",
+          flightTime: convertMinutesToHHMM(status.flightTime) || "0:00",
         });
       }
     };
@@ -138,7 +162,7 @@ const convertMinutesToHHMM = (minutes) => {
     }
   }, [flightData.userId]);
 
-  
+
 
   const handleClickInside = (e) => {
     e.stopPropagation();
@@ -153,10 +177,14 @@ const convertMinutesToHHMM = (minutes) => {
         <img src={getLiveryImage(flightData.liveryId)} alt="Livery" className="livery-image" />
       </div>
       <div className="usercallsign">
-        <span className="circuloIcon">
-          <CiPaperplane />{" "}
-        </span>{" "}
-        {flightData.callsign}
+        <span >
+          {logoUrl ? (
+            <img src={logoUrl} alt="Airplane Logo" className="airplane-logo" />
+          ) : (
+            <CiPaperplane />
+          )}
+        </span>
+        <span className="callsign-text">{flightData.callsign}</span>
       </div>
       <div className="userroute">
         <div className="progress-container">
@@ -222,14 +250,32 @@ const convertMinutesToHHMM = (minutes) => {
         </div>
       </div>
       <div className="inforusername">
-      <span className="username-large">{flightData.username}   {isStaff && <FaShieldAlt className="staff-icon" />} {/* Ícone de escudo */}</span>
-        {streamer && (
-          <span className="stream-icons">
-            {streamer.twitch && <a href={streamer.twitch} target="_blank" rel="noopener noreferrer"><FaTwitch className="stream-icon" /></a>}
-            {streamer.youtube && <a href={streamer.youtube} target="_blank" rel="noopener noreferrer"><FaYoutube className="stream-icon" /></a>}
-          </span>
-        )}
-      </div>
+  <span className="username-large">
+    {flightData.username || "Anonymous User"} 
+    {isStaff && <FaShieldAlt className="staff-icon" />} {/* Ícone de escudo */}
+  </span>
+
+  {streamer && (
+    <span className="stream-icons">
+      {streamer.twitch && (
+        <a href={streamer.twitch} target="_blank" rel="noopener noreferrer">
+          <FaTwitch className="stream-icon" />
+        </a>
+      )}
+      {streamer.youtube && (
+        <a href={streamer.youtube} target="_blank" rel="noopener noreferrer">
+          <FaYoutube className="stream-icon" />
+        </a>
+      )}
+    </span>
+  )}
+</div>
+<div className="inforusername">
+  <span className="usernamevavo">
+    {flightData.virtualOrganization || "Independent Pilot"}
+  </span>
+</div>
+
     </div>
   );
 });

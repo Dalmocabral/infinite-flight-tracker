@@ -442,7 +442,50 @@
         "LiveryName": "Hi Fly",
         "modelo": "Airbus A380",        
         "image": "https://i.ibb.co/zQ5cxFZ/Hi-Fly.png"
+    },
+    {
+        "id": "82f96a77-e15e-410e-8fa8-7de5c9120abf",
+        "LiveryName": "LATAM",
+        "modelo": "Boeing 787-9",        
+        "image": "https://i.ibb.co/DfKmc6L/tam.png"
+    },
+    {
+        "id": "d2081c69-4484-414f-b4b2-f0cf9b9cea81",
+        "LiveryName": "Aeromexico",
+        "modelo": "Boeing 787-9",        
+        "image": "https://i.ibb.co/s2S8NzL/Aero-Mexico.png"
+    },
+    {
+        "id": "98d8a712-8783-4846-9205-ccc5b7e3b2b5",
+        "LiveryName": "TAM Airlines",
+        "modelo": "Airbus A350",        
+        "image": "https://i.ibb.co/7yjxqNd/tam.png"
+    },
+    {
+        "id": "149db242-93be-441b-b2c4-d541bc710aff",
+        "LiveryName": "Iberia",
+        "modelo": "Airbus A350",        
+        "image": "https://i.ibb.co/d24TkMp/Iberia.png"
+    },
+    {
+        "id": "a780fede-54ac-44ef-beda-a5cc18b849a3",
+        "LiveryName": "Turkish Airlines",
+        "modelo": "Airbus A350",        
+        "image": "https://i.ibb.co/3dX0nXX/Turkish-Airlines.png"
+    },
+    {
+        "id": "03318dfc-6328-4e8c-8288-3a7ea69c4249",
+        "LiveryName": "Turkish Airlines",
+        "modelo": "Boeing 777-300ER",        
+        "image": "https://i.ibb.co/YhcYWNM/Turkish-Airlines.png"
+    },
+    {
+        "id": "fe1a992f-16ef-4dac-b100-c838e710f489",
+        "LiveryName": "Generic",
+        "modelo": "Boeing 787-8",        
+        "image": "https://i.ibb.co/vdYWM6P/Generic.png"
     }
+
     
     
     

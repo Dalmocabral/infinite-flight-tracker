@@ -40,14 +40,16 @@
 
 /* Estilos para o callsign do usuário */
 .usercallsign {
-  background-color: #03459c;
-  padding: 10px;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  height: auto;
-  color: #FFF;
+  display: flex; /* Define o layout como flexbox */
+  align-items: center; /* Centraliza verticalmente */
+  justify-content: center; /* Centraliza horizontalmente */
+  gap: 10px; /* Espaço entre o logo e o texto */
+  background-color: #03459c; /* Cor de fundo (opcional) */
+  padding: 10px; /* Espaço interno */
+  color: #fff; /* Cor do texto */
+  font-size: 20px; /* Tamanho do texto */
 }
+
 
 .circuloIcon {
   display: flex;
@@ -232,4 +234,31 @@
   
   margin-left: 5px; /* Espaço entre o nome e o ícone */
   font-size: 1.2rem; /* Tamanho do ícone */
+}
+
+.airplane-logo {
+  width: 45px; /* Tamanho do logo */
+  height: 45px;
+  object-fit: contain; /* Garante que a imagem não distorça */
+}
+
+.callsign-text {
+  white-space: nowrap; /* Impede que o texto quebre em várias linhas */
+  font-size: inherit; /* Usa o tamanho de fonte do contêiner */
+}
+
+/* Estilos para o nome de usuário */
+.inforusername {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: rgb(45, 45, 46);
+  border-radius: 10px;
+  text-align: center;
+  margin-bottom: 16px;
+  color: #fff;
+  
+}
+
+.usernamevavo {
+  font-size: 1.3rem;
 }
