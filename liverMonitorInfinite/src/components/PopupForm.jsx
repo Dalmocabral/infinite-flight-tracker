@@ -38,7 +38,7 @@ const PopupForm = () => {
   // Função para enviar os dados do formulário
   // Function to submit the form data
   const handleSubmit = () => {
-    console.log("Dados do Formulário:", formData); // Exibe os dados no console / Logs form data
+    //console.log("Dados do Formulário:", formData); // Exibe os dados no console / Logs form data
     handleClose(); // Fecha o popup após o envio / Closes the popup after submission
   };
 

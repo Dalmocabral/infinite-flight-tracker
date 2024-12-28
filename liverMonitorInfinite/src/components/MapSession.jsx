@@ -20,8 +20,8 @@ const MapSession = ({ sessionId, onIconClick }) => {
   // Recuperar dados salvos localmente
   const savedUsername = localStorage.getItem('formUsername');
   const savedVAName = localStorage.getItem('vaName');
-  console.log('LocalStorage username:', savedUsername);
-  console.log('LocalStorage VA/VO:', savedVAName);
+  //console.log('LocalStorage username:', savedUsername);
+  //console.log('LocalStorage VA/VO:', savedVAName);
 
   useEffect(() => {
     const fetchFlights = async () => {
@@ -69,7 +69,7 @@ const MapSession = ({ sessionId, onIconClick }) => {
           el.style.transform = `rotate(${heading}deg)`;
 
           el.addEventListener('click', async () => {
-            console.log("Ícone do avião clicado, removendo polilinhas...");
+            //console.log("Ícone do avião clicado, removendo polilinhas...");
             removePolylines();
 
             onIconClick(flight);
@@ -78,7 +78,7 @@ const MapSession = ({ sessionId, onIconClick }) => {
               const route = await ApiService.getRoute(sessionId, flight.flightId);
 
               if (route && route.length > 0) {
-                console.log("Dados da rota recebidos:", route);
+                //console.log("Dados da rota recebidos:", route);
 
                 // Converter os dados da rota em coordenadas
                 let coordinates = route.map(point => [point.longitude, point.latitude]);
@@ -130,12 +130,12 @@ const MapSession = ({ sessionId, onIconClick }) => {
 
                 // Salvar as novas polilinhas no estado
                 setCurrentPolyline(newPolyline);
-                console.log("Polilinhas adicionadas:", newPolyline);
+                //console.log("Polilinhas adicionadas:", newPolyline);
               } else {
-                console.warn("Nenhum dado de rota retornado.");
+                //console.warn("Nenhum dado de rota retornado.");
               }
             } catch (error) {
-              console.error('Erro ao buscar rota:', error);
+              //console.error('Erro ao buscar rota:', error);
             }
           });
 
@@ -165,7 +165,7 @@ const MapSession = ({ sessionId, onIconClick }) => {
 
       // Adicionar evento de clique no mapa para limpar polilinhas
       map.current.on('click', () => {
-        console.log("Mapa clicado, removendo polilinhas...");
+        //console.log("Mapa clicado, removendo polilinhas...");
         removePolylines();
       });
     }
@@ -184,7 +184,7 @@ const MapSession = ({ sessionId, onIconClick }) => {
 
   // Função para remover polilinhas
   const removePolylines = () => {
-    console.log("Removendo polilinhas...");
+    //console.log("Removendo polilinhas...");
 
     currentPolyline.forEach((layerId) => {
       if (map.current.getLayer(layerId)) {

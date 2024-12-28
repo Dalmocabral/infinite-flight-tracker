@@ -10,7 +10,7 @@ import { IoIosAirplane } from "react-icons/io";
 import { FaYoutube, FaTwitch } from "react-icons/fa6"; // Importar ícones
 import staffList from "./Staff.json";
 import { FaShieldAlt } from "react-icons/fa"; // Ícone de escudo
-
+import { Chart } from "react-google-charts"; // Importando o componente do Google Charts
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371e3; // Raio da Terra em metros
@@ -45,6 +45,39 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
   const [userStatus, setUserStatus] = useState({ xp: 0, grade: "N/A", flightTime: "0:00" });
   const [progress, setProgress] = useState(0);
   const [airplaneLogos, setAirplaneLogos] = useState([]); // Estado para armazenar os dados da API
+  const [chartData, setChartData] = useState([["Time", "Altitude", "Ground Speed"]]); // Dados iniciais para o gráfico
+
+  useEffect(() => {
+    const fetchRouteData = async () => {
+      try {
+        const route = await ApiService.getRoute(sessionId, flightData.flightId);
+        console.log("Dados brutos da rota:", route); // Log dos dados completos
+
+        if (!route || route.length === 0) {
+          console.error("Dados da rota estão vazios ou inválidos");
+          return;
+        }
+
+        // Transformar os dados recebidos no formato esperado pelo gráfico
+        const formattedData = route.map((point, index) => [
+          index.toString(), // Tempo como string para o eixo X
+          point.altitude || 0, // Altitude, com fallback para 0
+          point.groundSpeed || 0, // Ground Speed, com fallback para 0
+        ]);
+
+        setChartData([["Time", "Altitude", "Ground Speed"], ...formattedData]);
+        console.log("Dados formatados para o gráfico:", [["Time", "Altitude", "Ground Speed"], ...formattedData]);
+      } catch (error) {
+        console.error("Erro ao buscar dados da rota:", error);
+      }
+    };
+
+    if (flightData.flightId && sessionId) {
+      fetchRouteData();
+    }
+  }, [flightData.flightId, sessionId]);
+
+
 
 
 
@@ -250,31 +283,72 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
         </div>
       </div>
       <div className="inforusername">
-  <span className="username-large">
-    {flightData.username || "Anonymous User"} 
-    {isStaff && <FaShieldAlt className="staff-icon" />} {/* Ícone de escudo */}
-  </span>
+        <span className="username-large">
+          {flightData.username || "Anonymous User"}
+          {isStaff && <FaShieldAlt className="staff-icon" />} {/* Ícone de escudo */}
+        </span>
 
-  {streamer && (
-    <span className="stream-icons">
-      {streamer.twitch && (
-        <a href={streamer.twitch} target="_blank" rel="noopener noreferrer">
-          <FaTwitch className="stream-icon" />
-        </a>
-      )}
-      {streamer.youtube && (
-        <a href={streamer.youtube} target="_blank" rel="noopener noreferrer">
-          <FaYoutube className="stream-icon" />
-        </a>
-      )}
-    </span>
-  )}
+        {streamer && (
+          <span className="stream-icons">
+            {streamer.twitch && (
+              <a href={streamer.twitch} target="_blank" rel="noopener noreferrer">
+                <FaTwitch className="stream-icon" />
+              </a>
+            )}
+            {streamer.youtube && (
+              <a href={streamer.youtube} target="_blank" rel="noopener noreferrer">
+                <FaYoutube className="stream-icon" />
+              </a>
+            )}
+          </span>
+        )}
+      </div>
+      <div className="inforusername">
+        
+        <span className="usernamevavo">
+          {flightData.virtualOrganization || "Independent Pilot"}
+        </span>
+      </div>
+      <div className="inforusername">
+  <div className="inforchart">
+    {chartData.length > 1 ? (
+      <Chart
+        chartType="LineChart"
+        width="100%" // Ajuste o percentual ou defina um valor fixo, como "500px"
+        height="250px" // Ajuste a altura para um valor menor
+        data={chartData}
+        options={{
+          
+          vAxes: {
+            0: { 
+              title: "", // Remove o título "Altitude (ft)"
+              textStyle: { color: "#ffffff" }, // Texto branco no eixo Y esquerdo
+            },
+            1: { 
+              title: "", // Remove o título "Ground Speed (knots)"
+              textStyle: { color: "#ffffff" }, // Texto branco no eixo Y direito
+            },
+          },
+          series: {
+            0: { targetAxisIndex: 0, color: "#1f77b4" }, // Altitude no eixo 0
+            1: { targetAxisIndex: 1, color: "#ff0e22" }, // Ground Speed no eixo 1
+          },
+          backgroundColor: "transparent", // Remove o fundo branco
+          chartArea: {
+            left: 50, right: 50, top: 20, bottom: 50, // Ajuste das margens, se necessário
+          },
+          titleTextStyle: { color: "#ffffff" }, // Título do gráfico em branco
+          legend: { textStyle: { color: "#ffffff" } }, // Texto da legenda em branco
+        }}
+      />
+    ) : (
+      <p>Loading chart...</p>
+    )}
+  </div>
 </div>
-<div className="inforusername">
-  <span className="usernamevavo">
-    {flightData.virtualOrganization || "Independent Pilot"}
-  </span>
-</div>
+
+
+
 
     </div>
   );
