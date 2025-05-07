@@ -5,15 +5,11 @@
   width: 300px;
   max-height: 100vh;
   overflow-y: auto; /* Permite scroll do mouse */
-  scrollbar-width: none; /* Oculta a barra de rolagem para navegadores compatíveis */
-  -ms-overflow-style: none; /* Oculta a barra de rolagem para navegadores baseados em IE e Edge */
+ 
+ 
 }
 
-/* Barra de rolagem personalizada para navegadores baseados em Webkit (Chrome, Safari) */
-.session-info-sidebar::-webkit-scrollbar {
-  width: 0px; /* Oculta a barra de rolagem */
-  background: transparent; /* Fundo transparente para garantir que a barra não apareça */
-}
+
 
 .session-info-sidebar::-webkit-scrollbar-track {
   background: transparent; /* Fundo transparente para garantir que a barra não apareça */

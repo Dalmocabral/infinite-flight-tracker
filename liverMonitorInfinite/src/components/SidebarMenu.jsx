@@ -12,9 +12,9 @@ const { Sider } = Layout;
 // Define server sessions
 // Define as sessões dos servidores
 const sessions = {
-  training: { id: '9ed5512e-b6eb-401f-bab8-42bdbdcf2bab', name: 'Training Server' }, // version 24.4
-  casual: { id: '7e4681bf-9fee-4c68-ba62-eda1f2f0e780', name: 'Casual Server' }, // version 24.4
-  expert: { id: '9bdfef34-f03b-4413-b8fa-c29949bb18f8', name: 'Expert Server' } // version 24.4
+  training: { id: '15f884a5-52ec-467e-bda5-414d4569544d', name: 'Training Server' }, // version 24.4
+  casual: { id: '1f5ff830-8e4d-4477-89e7-21c136d54844', name: 'Casual Server' }, // version 24.4
+  expert: { id: 'ed323139-baa7-4834-b9d6-5fb9f19ff11e', name: 'Expert Server' } // version 24.4
 };
 
 export const SidebarMenu = () => {

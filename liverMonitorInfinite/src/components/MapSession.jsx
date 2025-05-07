@@ -16,6 +16,9 @@ const MapSession = ({ sessionId, onIconClick }) => {
   const markers = useRef([]);
   const [currentPolyline, setCurrentPolyline] = useState([]);
   const [flightPlanPolyline, setFlightPlanPolyline] = useState([]);
+  // Adicionar variáveis para controlar o comportamento de clique e arrasto
+  const isDragging = useRef(false);
+  const clickTimeout = useRef(null);
 
   // Recuperar dados salvos localmente
   const savedUsername = localStorage.getItem('formUsername');
@@ -163,10 +166,33 @@ const MapSession = ({ sessionId, onIconClick }) => {
       const navControl = new NavigationControl(); // Cria o controle de navegação
       map.current.addControl(navControl, 'bottom-right'); // Adiciona os controles no canto superior direito
 
-      // Adicionar evento de clique no mapa para limpar polilinhas
-      map.current.on('click', () => {
-        //console.log("Mapa clicado, removendo polilinhas...");
-        removePolylines();
+      // Modificar os eventos do mapa para diferenciar entre clique e arrasto
+      map.current.on('mousedown', () => {
+        // Quando o mouse é pressionado, definimos um timeout para verificar se é um clique ou arrasto
+        isDragging.current = false;
+        
+        // Limpar qualquer timeout existente
+        if (clickTimeout.current) {
+          clearTimeout(clickTimeout.current);
+        }
+      });
+
+      map.current.on('mousemove', () => {
+        // Se o mouse se mover após o mousedown, consideramos como arrasto
+        isDragging.current = true;
+      });
+
+      map.current.on('mouseup', () => {
+        // Quando o mouse é liberado, verificamos se foi um clique ou arrasto
+        if (!isDragging.current) {
+          // Foi um clique simples, então definimos um timeout para remover as polilinhas
+          clickTimeout.current = setTimeout(() => {
+            //console.log("Clique simples no mapa, removendo polilinhas...");
+            removePolylines();
+          }, 50); // Pequeno delay para garantir que não é parte de um duplo clique
+        }
+        // Resetamos o estado de arrasto
+        isDragging.current = false;
       });
     }
 

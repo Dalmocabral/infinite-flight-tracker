@@ -304,47 +304,38 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
         )}
       </div>
       <div className="inforusername">
-        
+
         <span className="usernamevavo">
           {flightData.virtualOrganization || "Independent Pilot"}
         </span>
       </div>
-      <div className="inforusername">
-  <div className="inforchart">
-    {chartData.length > 1 ? (
-      <Chart
-        chartType="LineChart"
-        width="100%" // Ajuste o percentual ou defina um valor fixo, como "500px"
-        height="250px" // Ajuste a altura para um valor menor
-        data={chartData}
-        options={{
-          
-          vAxes: {
-            0: { 
-              title: "", // Remove o título "Altitude (ft)"
-              textStyle: { color: "#ffffff" }, // Texto branco no eixo Y esquerdo
-            },
-            1: { 
-              title: "", // Remove o título "Ground Speed (knots)"
-              textStyle: { color: "#ffffff" }, // Texto branco no eixo Y direito
-            },
-          },
-          series: {
-            0: { targetAxisIndex: 0, color: "#1f77b4" }, // Altitude no eixo 0
-            1: { targetAxisIndex: 1, color: "#ff0e22" }, // Ground Speed no eixo 1
-          },
-          backgroundColor: "transparent", // Remove o fundo branco
-          chartArea: {
-            left: 50, right: 50, top: 20, bottom: 50, // Ajuste das margens, se necessário
-          },
-          titleTextStyle: { color: "#ffffff" }, // Título do gráfico em branco
-          legend: { textStyle: { color: "#ffffff" } }, // Texto da legenda em branco
-        }}
-      />
-    ) : (
-      <p>Loading chart...</p>
-    )}
-  </div>
+      <div className="inforchart">
+  {chartData.length > 1 ? (
+    <Chart
+      chartType="LineChart"
+      width="100%" // Usa 100% para ocupar todo o espaço do card
+      height="200px" // Ajuste a altura conforme necessário
+      data={chartData}
+      options={{
+        vAxes: {
+          0: { textStyle: { color: "#ffffff" } }, // Texto branco no eixo Y esquerdo
+          1: { textStyle: { color: "#ffffff" } }, // Texto branco no eixo Y direito
+        },
+        series: {
+          0: { targetAxisIndex: 0, color: "#1f77b4" }, // Altitude no eixo 0
+          1: { targetAxisIndex: 1, color: "#ff0e22" }, // Ground Speed no eixo 1
+        },
+        backgroundColor: "transparent", // Fundo transparente
+        chartArea: {
+          left: 30, right: 30, top: 10, bottom: 10, // Ajuste as margens internas
+        },
+        legend: "none", // Remove as legendas
+        titleTextStyle: { color: "#ffffff" }, // Título do gráfico em branco
+      }}
+    />
+  ) : (
+    <p>Loading chart...</p>
+  )}
 </div>
 
 
