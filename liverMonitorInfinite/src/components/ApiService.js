@@ -1,7 +1,7 @@
 // ApiService.js
 import axios from 'axios';
 
-const API_KEY = 'nvo8c790hfa9q3duho2jhgd2jf8tgwqw';
+const API_KEY = import.meta.env.VITE_API_KEY;
 const BASE_URL = 'https://api.infiniteflight.com/public/v2';
 
 const ApiService = {

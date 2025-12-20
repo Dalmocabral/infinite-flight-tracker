@@ -1,29 +1,27 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Chart } from "react-google-charts";
 import ApiService from './ApiService'; // Importa o serviço de API / Imports the API service
-import "./SidebarMenu.css";
-import "./SessionInfoSidebar.css";
 import aircraftDataJson from "./GetAircraft.json"; // Importa o JSON de aeronaves / Imports the aircraft JSON
+import "./SessionInfoSidebar.css";
+import "./SidebarMenu.css";
+
+import { useAtc } from '../hooks/useAtc';
+import { useFlights } from '../hooks/useFlights';
+import SidebarSkeleton from './SidebarSkeleton';
 
 const SessionInfoSidebar = ({ sessionName, sessionId }) => {
   // Estado para armazenar o número de usuários online
-  // State to store the number of online users
   const [userCount, setUserCount] = useState(null);
+  
+  // Hooks
+  const { data: flightData, isLoading: isLoadingFlights } = useFlights(sessionId);
+  const { data: atcData, isLoading: isLoadingAtc } = useAtc(sessionId);
 
-  // Estado para armazenar os dados do gráfico de aeronaves
-  // State to store aircraft chart data
+  // Estados derivados (poderiam ser memoized, mas useEffect é ok para manter estrutura se preferir, ou melhor: useMemo)
   const [aircraftData, setAircraftData] = useState([]);
-
-  // Estado para armazenar os dados dos aeroportos
-  // State to store airport data
   const [airports, setAirports] = useState([]);
-
-  // Estado para armazenar os dados do ATC
-  // State to store ATC data
-  const [atcData, setAtcData] = useState([]);
-
-  // Busca o número de usuários na sessão
-  // Fetches the number of users in the session
+  
+  // Fetch Session Data (Ainda manual pois não criamos hook específico useSession, mantemos useEffect simples ou criamos hook depois)
   useEffect(() => {
     const fetchSessionData = async () => {
       try {
@@ -33,54 +31,40 @@ const SessionInfoSidebar = ({ sessionName, sessionId }) => {
         console.error("Erro ao buscar dados da sessão:", error);
       }
     };
-
     fetchSessionData();
   }, [sessionId]);
 
-  // Busca os dados de voos para popular o gráfico de aeronaves
-  // Fetches flight data to populate the aircraft chart
+  // Process Flight Data for Charts & Airports
   useEffect(() => {
-    const fetchFlightData = async () => {
-      try {
-        const flightData = await ApiService.getFlightData(sessionId);
+    if (!flightData) return;
 
-        // Conta a quantidade de cada aeronave
-        // Counts the occurrences of each aircraft
-        const aircraftCount = flightData.reduce((acc, flight) => {
-          const { aircraftId } = flight;
-          acc[aircraftId] = (acc[aircraftId] || 0) + 1;
-          return acc;
-        }, {});
+    // 1. Aircraft Chart
+    const aircraftCount = flightData.reduce((acc, flight) => {
+        const { aircraftId } = flight;
+        acc[aircraftId] = (acc[aircraftId] || 0) + 1;
+        return acc;
+    }, {});
 
-        // Mapeia os dados para o formato do gráfico
-        // Maps data into chart format
-        const aircraftArray = Object.entries(aircraftCount)
-          .map(([id, count]) => {
-            const aircraft = aircraftDataJson.result.find((ac) => ac.id === id);
-            return [aircraft ? aircraft.name : "Desconhecido", count];
-          })
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5);
+    const aircraftArray = Object.entries(aircraftCount)
+        .map(([id, count]) => {
+        const aircraft = aircraftDataJson.result.find((ac) => ac.id === id);
+        return [aircraft ? aircraft.name : "Desconhecido", count];
+        })
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
 
-        const chartData = [["Aeronave", "Quantidade"], ...aircraftArray];
-        setAircraftData(chartData);
-      } catch (error) {
-        console.error("Erro ao buscar dados de voos:", error);
-      }
-    };
+    setAircraftData([["Aeronave", "Quantidade"], ...aircraftArray]);
 
-    fetchFlightData();
-  }, [sessionId]);
+  }, [flightData]);
 
-  // Busca os dados dos aeroportos mais populares
-  // Fetches data of the most popular airports
+  // Fetch Airports Data (Mantive separado pois ApiService.getAirportData parece ser endpoint diferente de getFlightData)
+  // Se getAirportData não for hookificado, mantemos useEffect.
+  // Nota: O plano original previa useFlights, useAtc. O getAirportData ainda é isolado.
+  // Vamos manter o useEffect do AirportData por enquanto.
   useEffect(() => {
     const fetchAirportsData = async () => {
       try {
         const airportData = await ApiService.getAirportData(sessionId);
-
-        // Ordena os aeroportos pelos voos de entrada
-        // Sorts airports by inbound flights
         const sortedAirports = airportData
           .sort((a, b) => b.inboundFlightsCount - a.inboundFlightsCount)
           .slice(0, 5);
@@ -89,35 +73,22 @@ const SessionInfoSidebar = ({ sessionName, sessionId }) => {
         console.error("Erro ao buscar dados dos aeroportos:", error);
       }
     };
-
     fetchAirportsData();
   }, [sessionId]);
 
-  // Busca os dados de ATC
-  // Fetches ATC data
-  useEffect(() => {
-    const fetchAtcData = async () => {
-      try {
-        const atcData = await ApiService.getAtcData(sessionId);
-        setAtcData(atcData);
-      } catch (error) {
-        console.error("Erro ao buscar dados de ATC:", error);
-      }
-    };
-
-    fetchAtcData();
-  }, [sessionId]);
+  // Loading State
+  if (isLoadingFlights || isLoadingAtc) {
+      return <SidebarSkeleton />;
+  }
 
   // Obtém o rótulo do tipo de ATC
-  // Gets the ATC type label
   const getTypeLabel = (type) => {
     const typeLabels = ["grd", "twr", "unicom", "clr", "app", "dep", "ctr", "atis"];
     return typeLabels[type] || "";
   };
 
   // Agrupa os dados de ATC por aeroporto
-  // Groups ATC data by airport
-  const atcGroupedByAirport = atcData.reduce((acc, atc) => {
+  const atcGroupedByAirport = (atcData || []).reduce((acc, atc) => {
     const { airportName, type } = atc;
     const typeLabel = getTypeLabel(type);
     if (!acc[airportName]) {
