@@ -1,56 +1,187 @@
-import React, { useEffect, useRef, useState } from "react";
-import maplibregl, { NavigationControl } from "maplibre-gl"; // Importe NavigationControl
-
 import '@maptiler/sdk/dist/maptiler-sdk.css';
-import "./MapSession.css";
-import ZuluClock from './ZuluClock';
+import axios from 'axios';
+import maplibregl, { NavigationControl } from "maplibre-gl";
+import { useEffect, useRef, useState } from "react";
 import ApiService from './ApiService';
-import stremerData from './stremer.json'; // Importar o arquivo JSON
-import staffData from './staff.json'; // Importar o arquivo JSON dos staffs
 import dataSetIconAircraft from './dataSetIconAircraft.json';
+import "./MapSession.css";
+import staffData from './staff.json';
+import stremerData from './stremer.json';
+import ZuluClock from './ZuluClock';
 
+const GEOJSON_URL = 'https://raw.githubusercontent.com/vatsimnetwork/vatspy-data-project/refs/heads/master/Boundaries.geojson';
 
-const MapSession = ({ sessionId, onIconClick }) => {
+const MapSession = ({ sessionId, sessionName, onIconClick }) => {
   const mapContainer = useRef(null);
   const map = useRef();
   const markers = useRef([]);
   const [currentPolyline, setCurrentPolyline] = useState([]);
   const [flightPlanPolyline, setFlightPlanPolyline] = useState([]);
-  // Adicionar variáveis para controlar o comportamento de clique e arrasto
+  const [boundariesGeoJson, setBoundariesGeoJson] = useState(null);
   const isDragging = useRef(false);
   const clickTimeout = useRef(null);
 
-  // Recuperar dados salvos localmente
   const savedUsername = localStorage.getItem('formUsername');
   const savedVAName = localStorage.getItem('vaName');
-  //console.log('LocalStorage username:', savedUsername);
-  //console.log('LocalStorage VA/VO:', savedVAName);
 
   useEffect(() => {
+    const fetchBoundaries = async () => {
+      try {
+        const response = await axios.get(GEOJSON_URL);
+        setBoundariesGeoJson(response.data);
+      } catch (error) {
+        console.error("Erro ao carregar Boundaries.geojson:", error);
+      }
+    };
+    fetchBoundaries();
+  }, []);
+
+  // Função auxiliar para criar círculo (Raio em KM)
+  const createGeoJSONCircle = (center, radiusInCm, points) => {
+    if (!points) points = 64;
+    const coords = {
+      latitude: center[1],
+      longitude: center[0]
+    };
+    const km = radiusInCm / 1000;
+    const ret = [];
+    const distanceX = km / (111.32 * Math.cos((coords.latitude * Math.PI) / 180));
+    const distanceY = km / 110.574;
+
+    let theta, x, y;
+    for (let i = 0; i < points; i++) {
+        theta = (i / points) * (2 * Math.PI);
+        x = distanceX * Math.cos(theta);
+        y = distanceY * Math.sin(theta);
+        ret.push([coords.longitude + x, coords.latitude + y]);
+    }
+    ret.push(ret[0]);
+    return {
+        type: 'Feature',
+        geometry: {
+            type: 'Polygon',
+            coordinates: [ret]
+        },
+        properties: {
+            id: 'generated-circle'
+        }
+    };
+  };
+
+  useEffect(() => {
+    const updateAtcLayer = async () => {
+      // Limpa camadas se não for Expert Server
+      const isExpert = sessionName && sessionName.includes('Expert');
+      
+      if (!isExpert) {
+        if (map.current && map.current.getSource('atc-boundaries')) {
+             map.current.getSource('atc-boundaries').setData({ type: 'FeatureCollection', features: [] });
+        }
+        return;
+      }
+
+      try {
+        const atcData = await ApiService.getAtcData(sessionId);
+        // Tipos: 0=Ground, 1=Tower, 4=Approach, 5=Departure, 6=Center
+        const activeAtc = atcData.filter(atc => [0, 1, 4, 5, 6].includes(atc.type));
+        
+        let allFeatures = [];
+        const unmatchedAtc = [];
+
+        // 1. Tenta encontrar no GeoJSON (Principalmente Centers/FIRs)
+        if (boundariesGeoJson) {
+             const activeIcaos = activeAtc.map(a => a.airportName);
+             const matchedFeatures = boundariesGeoJson.features.filter(feature => {
+                 return activeIcaos.includes(feature.properties.id); 
+             });
+             
+             // Adiciona cor padrão AZUL para os encontrados no GeoJSON (geralmente Centers)
+             const styledMatched = matchedFeatures.map(f => ({
+                 ...f,
+                 properties: { ...f.properties, color: '#0080ff', className: 'FIR' }
+             }));
+             
+             allFeatures = [...styledMatched];
+
+             // Identifica quais não foram encontrados para desenhar círculo
+             const matchedIds = matchedFeatures.map(f => f.properties.id);
+             activeAtc.forEach(atc => {
+                 if (!matchedIds.includes(atc.airportName)) {
+                     unmatchedAtc.push(atc);
+                 }
+             });
+        } else {
+            // Se GeoJSON não carregou, todos são unmatched
+            unmatchedAtc.push(...activeAtc);
+        }
+
+        // 2. Para os não encontrados, gera círculos
+        unmatchedAtc.forEach(atc => {
+            if (atc.latitude && atc.longitude) {
+                let radius = 92600; // Default
+                let color = '#0080ff'; // Default Blue
+
+                if (atc.type === 6) { radius = 92600; color = '#0080ff'; } // Center ~50nm
+                if (atc.type === 4) { radius = 92600; color = '#0080ff'; } // Approach ~50nm
+                if (atc.type === 5) { radius = 55560; color = '#0080ff'; } // Departure ~30nm
+                
+                // Novos tipos solicitados
+                if (atc.type === 1) { radius = 18520; color = '#ff4d4d'; } // Tower ~10nm (Vermelho Claro)
+                if (atc.type === 0) { radius = 5556; color = '#8b0000'; }  // Ground ~3nm (Vermelho Escuro)
+                
+                const km = radius / 1000;
+                const ret = [];
+                const distanceX = km / (111.32 * Math.cos((atc.latitude * Math.PI) / 180));
+                const distanceY = km / 110.574;
+                for (let i = 0; i < 64; i++) {
+                    const theta = (i / 64) * (2 * Math.PI);
+                    const x = distanceX * Math.cos(theta);
+                    const y = distanceY * Math.sin(theta);
+                    ret.push([atc.longitude + x, atc.latitude + y]);
+                }
+                ret.push(ret[0]);
+                
+                allFeatures.push({
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [ret]
+                    },
+                    properties: {
+                        id: atc.airportName || 'Unknown',
+                        color: color
+                    }
+                });
+            }
+        });
+
+        const dataToRender = {
+            type: 'FeatureCollection',
+            features: allFeatures
+        };
+
+        if (map.current && map.current.getSource('atc-boundaries')) {
+            map.current.getSource('atc-boundaries').setData(dataToRender);
+        }
+      } catch (error) {
+        console.error("Erro ao atualizar camadas ATC:", error);
+      }
+    };
+
     const fetchFlights = async () => {
       try {
         const flightData = await ApiService.getFlightData(sessionId);
 
-        // Remover marcadores existentes
         markers.current.forEach(marker => marker.remove());
         markers.current = [];
 
-        // Processar dados de cada voo
         flightData.forEach(flight => {
           const { latitude, longitude, heading, username, virtualOrganization, aircraftId } = flight;
-
           const el = document.createElement('div');
-
-          // Verificar se o username está online no stremer.json
           const streamer = stremerData.find(st => st.username === username);
-
-          // Verificar se o username está no staff.json
           const isStaff = staffData.some(staff => staff.username === username);
-
-          // Comparar o aircraftId com o dataSetIconAircraft.json
           const aircraft = dataSetIconAircraft.GA.find(ac => ac.id === aircraftId);
 
-          // Determinar o ícone do avião
           if (!username || username === null) {
             el.className = 'airplane-icon';
           } else if (username === savedUsername) {
@@ -60,95 +191,56 @@ const MapSession = ({ sessionId, onIconClick }) => {
           } else if (streamer && (streamer.twitch || streamer.youtube)) {
             el.className = 'online-airplane-icon';
           } else if (isStaff) {
-            el.className = 'staff-airplane-icon'; // Ícone para staff
+            el.className = 'staff-airplane-icon';
           } else if (aircraft) {   
-            el.className = 'custom-aircraft-icon'; // Classe personalizada para aviões específicos
+            el.className = 'custom-aircraft-icon';
           } else {
             el.className = 'airplane-icon';
           }
 
-
-
           el.style.transform = `rotate(${heading}deg)`;
 
           el.addEventListener('click', async () => {
-            //console.log("Ícone do avião clicado, removendo polilinhas...");
             removePolylines();
-
             onIconClick(flight);
-
             try {
               const route = await ApiService.getRoute(sessionId, flight.flightId);
-
               if (route && route.length > 0) {
-                //console.log("Dados da rota recebidos:", route);
-
-                // Converter os dados da rota em coordenadas
                 let coordinates = route.map(point => [point.longitude, point.latitude]);
-
-                // Garantir que o ponto final (posição atual do avião) seja adicionado
                 coordinates.push([longitude, latitude]);
-
-                // Dividir a linha na Linha Internacional de Data, se necessário
                 const correctedCoordinates = splitLineAtDateLine(coordinates);
-
                 const newPolyline = [];
-
                 correctedCoordinates.forEach((segment, index) => {
                   const layerId = `flight-route-segment-${index}`;
-
-                  // Verificar se a camada já existe antes de adicionar
-                  if (map.current.getLayer(layerId)) {
-                    map.current.removeLayer(layerId);
-                  }
-                  if (map.current.getSource(layerId)) {
-                    map.current.removeSource(layerId);
-                  }
-
-                  // Adicionar fonte GeoJSON
+                  if (map.current.getLayer(layerId)) map.current.removeLayer(layerId);
+                  if (map.current.getSource(layerId)) map.current.removeSource(layerId);
                   map.current.addSource(layerId, {
                     type: 'geojson',
-                    data: {
-                      type: 'Feature',
-                      geometry: {
-                        type: 'LineString',
-                        coordinates: segment,
-                      }
-                    }
+                    data: { type: 'Feature', geometry: { type: 'LineString', coordinates: segment } }
                   });
-
-                  // Adicionar camada da linha
                   map.current.addLayer({
                     id: layerId,
                     type: 'line',
                     source: layerId,
-                    paint: {
-                      'line-color': '#0000FF',
-                      'line-width': 2,
-                    }
+                    paint: { 'line-color': '#0000FF', 'line-width': 2 }
                   });
-
                   newPolyline.push(layerId);
                 });
-
-                // Salvar as novas polilinhas no estado
                 setCurrentPolyline(newPolyline);
-                //console.log("Polilinhas adicionadas:", newPolyline);
-              } else {
-                //console.warn("Nenhum dado de rota retornado.");
               }
-            } catch (error) {
-              //console.error('Erro ao buscar rota:', error);
-            }
+            } catch (error) {}
           });
 
           const marker = new maplibregl.Marker({ element: el })
             .setLngLat([longitude, latitude])
             .addTo(map.current);
-
           marker.setRotation(heading);
           markers.current.push(marker);
         });
+        
+        // Update ATC Layer
+        updateAtcLayer();
+
       } catch (error) {
         console.error('Error fetching flight data:', error);
       }
@@ -162,45 +254,64 @@ const MapSession = ({ sessionId, onIconClick }) => {
         zoom: 2,
       });
 
-      // Adicionar controles de navegação (Zoom In e Zoom Out)
-      const navControl = new NavigationControl(); // Cria o controle de navegação
-      map.current.addControl(navControl, 'bottom-right'); // Adiciona os controles no canto superior direito
+      const navControl = new NavigationControl();
+      map.current.addControl(navControl, 'bottom-right');
 
-      // Modificar os eventos do mapa para diferenciar entre clique e arrasto
+      map.current.on('load', () => {
+         // ATC Layers
+         map.current.addSource('atc-boundaries', {
+            type: 'geojson',
+            data: { type: 'FeatureCollection', features: [] }
+         });
+
+         map.current.addLayer({
+            id: 'atc-fill',
+            type: 'fill',
+            source: 'atc-boundaries',
+            paint: {
+                'fill-color': ['get', 'color'], // Usa a propriedade 'color' da feature
+                'fill-opacity': 0.15
+            }
+         });
+
+         map.current.addLayer({
+            id: 'atc-outline',
+            type: 'line',
+            source: 'atc-boundaries',
+            paint: {
+                'line-color': ['get', 'color'], // Usa a propriedade 'color' da feature
+                'line-width': 1
+            }
+         });
+      });
+
       map.current.on('mousedown', () => {
-        // Quando o mouse é pressionado, definimos um timeout para verificar se é um clique ou arrasto
         isDragging.current = false;
-        
-        // Limpar qualquer timeout existente
-        if (clickTimeout.current) {
-          clearTimeout(clickTimeout.current);
-        }
+        if (clickTimeout.current) clearTimeout(clickTimeout.current);
       });
 
       map.current.on('mousemove', () => {
-        // Se o mouse se mover após o mousedown, consideramos como arrasto
         isDragging.current = true;
       });
 
       map.current.on('mouseup', () => {
-        // Quando o mouse é liberado, verificamos se foi um clique ou arrasto
         if (!isDragging.current) {
-          // Foi um clique simples, então definimos um timeout para remover as polilinhas
           clickTimeout.current = setTimeout(() => {
-            //console.log("Clique simples no mapa, removendo polilinhas...");
             removePolylines();
-          }, 50); // Pequeno delay para garantir que não é parte de um duplo clique
+          }, 50);
         }
-        // Resetamos o estado de arrasto
         isDragging.current = false;
       });
     }
 
-    fetchFlights();
+    if (map.current) {
+        fetchFlights();
+    }
+    
     const intervalId = setInterval(fetchFlights, 30000);
     return () => clearInterval(intervalId);
-  }, [sessionId, onIconClick]);
-
+  }, [sessionId, sessionName, onIconClick, boundariesGeoJson]);
+  
   // Remover polilinhas ao mudar de servidor
   useEffect(() => {
     if (map.current) {
@@ -208,34 +319,16 @@ const MapSession = ({ sessionId, onIconClick }) => {
     }
   }, [sessionId]);
 
-  // Função para remover polilinhas
   const removePolylines = () => {
-    //console.log("Removendo polilinhas...");
-
     currentPolyline.forEach((layerId) => {
-      if (map.current.getLayer(layerId)) {
-        map.current.removeLayer(layerId);
-        //console.log(`Layer removido: ${layerId}`);
-      }
-      if (map.current.getSource(layerId)) {
-        map.current.removeSource(layerId);
-        //console.log(`Source removido: ${layerId}`);
-      }
+      if (map.current.getLayer(layerId)) map.current.removeLayer(layerId);
+      if (map.current.getSource(layerId)) map.current.removeSource(layerId);
     });
-
     setCurrentPolyline([]);
-
     flightPlanPolyline.forEach((layerId) => {
-      if (map.current.getLayer(layerId)) {
-        map.current.removeLayer(layerId);
-        //console.log(`Layer removido: ${layerId}`);
-      }
-      if (map.current.getSource(layerId)) {
-        map.current.removeSource(layerId);
-        //console.log(`Source removido: ${layerId}`);
-      }
+      if (map.current.getLayer(layerId)) map.current.removeLayer(layerId);
+      if (map.current.getSource(layerId)) map.current.removeSource(layerId);
     });
-
     setFlightPlanPolyline([]);
   };
 

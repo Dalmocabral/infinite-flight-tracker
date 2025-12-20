@@ -1,11 +1,11 @@
-import React, { useState, useRef } from 'react';
+import { Layout } from 'antd';
+import React, { useRef, useState } from 'react';
+import Logo from './Logo';
 import MapSession from './MapSession';
 import Menulist from './Menulist';
 import SessionInfoSidebar from './SessionInfoSidebar';
-import UserInfoSidebar from './UserInfoSidebar';
-import Logo from './Logo';
-import { Layout } from 'antd';
 import "./SidebarMenu.css";
+import UserInfoSidebar from './UserInfoSidebar';
 
 const { Sider } = Layout;
 
@@ -98,7 +98,11 @@ export const SidebarMenu = () => {
           
           {/* Map session component */}
           {/* Componente da sessão do mapa */}
-          <MapSession sessionId={sessions[selectedServer].id} onIconClick={handleMapIconClick} />
+          <MapSession 
+            sessionId={sessions[selectedServer].id} 
+            sessionName={sessions[selectedServer].name}
+            onIconClick={handleMapIconClick} 
+          />
           
           {/* User Info Sidebar */}
           {/* Barra lateral com informações do usuário */}
