@@ -70,9 +70,9 @@ export const SidebarMenu = () => {
   // Adds an event listener to detect outside clicks
   // Adiciona um listener de eventos para detectar cliques fora do componente
   React.useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('click', handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('click', handleClickOutside);
     };
   }, []);
 

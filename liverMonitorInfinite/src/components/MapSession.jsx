@@ -200,7 +200,8 @@ const MapSession = ({ sessionId, sessionName, onIconClick }) => {
 
           el.style.transform = `rotate(${heading}deg)`;
 
-          el.addEventListener('click', async () => {
+          el.addEventListener('click', async (e) => {
+            e.stopPropagation(); // Previne que o SidebarMenu feche imediatamente o painel
             removePolylines();
             onIconClick(flight);
             try {
