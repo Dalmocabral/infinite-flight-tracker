@@ -91,6 +91,36 @@ const ApiService = {
       throw error;
     }
   },
+
+  getAirportAtis: async (sessionId, airportIcao) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/sessions/${sessionId}/airport/${airportIcao}/atis?apikey=${API_KEY}`);
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching ATIS info:", error);
+      throw error;
+    }
+  },
+
+  getSessionNotams: async (sessionId) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/sessions/${sessionId}/notams?apikey=${API_KEY}`);
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching NOTAMs:", error);
+      throw error;
+    }
+  },
+
+  getAirportStatus: async (sessionId, airportIcao) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/sessions/${sessionId}/airport/${airportIcao}/status?apikey=${API_KEY}`);
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching airport status:", error);
+      throw error;
+    }
+  },
 };
 
 export default ApiService;

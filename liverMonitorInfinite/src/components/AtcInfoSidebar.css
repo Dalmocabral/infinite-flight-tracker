@@ -1,0 +1,124 @@
+.atc-info-sidebar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 350px;
+    height: 100vh;
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+    transition: transform 0.3s ease-in-out;
+}
+
+.atc-info-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 15px;
+    position: relative;
+}
+
+.close-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.atc-info-header h3 {
+    margin: 0;
+    color: #4dabf5; /* Light blue accent */
+    font-size: 1.5rem;
+}
+
+.atc-info-header h5 {
+    margin: 5px 0;
+    font-size: 1.2rem;
+    color: #fff;
+}
+
+.atc-info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.atc-info-section {
+    background: #252525;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.section-title {
+    display: block;
+    font-size: 0.9rem;
+    color: #888;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+}
+
+.atis-text {
+    font-family: monospace;
+    white-space: pre-wrap;
+    background: #111;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #ddd;
+}
+
+.notam-item {
+    background: #333;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.notam-item h4 {
+    margin: 0 0 5px 0;
+    color: #ffca28; /* Amber for warning/info */
+    font-size: 1rem;
+}
+
+.notam-author {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-top: 5px;
+}
+
+.traffic-stats {
+    display: flex;
+    justify-content: space-around;
+}
+
+.stat-box {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.time-stat {
+    font-size: 0.9rem;
+    color: #ccc;
+    margin-top: 5px;
+}
