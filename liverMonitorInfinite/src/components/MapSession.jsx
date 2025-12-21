@@ -17,11 +17,112 @@ const MapSession = ({ sessionId, sessionName, onIconClick }) => {
   const mapContainer = useRef(null);
   const map = useRef();
   const markers = useRef([]);
+  const [selectedFlightId, setSelectedFlightId] = useState(null);
+  
+  // React Query Hooks (Must be at the top)
+  const { data: flightsData, error: flightsError } = useFlights(sessionId);
+  const { data: atcData, error: atcError } = useAtc(sessionId);
+
+  // State & Refs
   const [currentPolyline, setCurrentPolyline] = useState([]);
-  const [flightPlanPolyline, setFlightPlanPolyline] = useState([]);
   const [boundariesGeoJson, setBoundariesGeoJson] = useState(null);
   const isDragging = useRef(false);
   const clickTimeout = useRef(null);
+
+  // Helper to draw colored trajectory
+  const updateTrajectory = async (flight) => {
+      try {
+        const routeData = await ApiService.getRoute(sessionId, flight.flightId);
+        
+        if (routeData && routeData.length > 0) {
+            const getColorFromAltitude = (altitude) => {
+                if (altitude < 100) return '#FF0000';
+                if (altitude < 2000) return '#FF4500';
+                if (altitude < 3000) return '#FFFF00';
+                if (altitude < 5000) return '#00FF00';
+                if (altitude < 10000) return '#32CD32';
+                if (altitude < 15000) return '#00FA9A';
+                if (altitude < 20000) return '#00FFFF';
+                if (altitude < 25000) return '#1E90FF';
+                return '#0000FF';
+            };
+
+            const segments = [];
+            // Add current position to route
+            const rawPoints = [...routeData, { latitude: flight.latitude, longitude: flight.longitude, altitude: flight.altitude }];
+            
+            const coordsToUnwrap = rawPoints.map(p => [p.longitude, p.latitude]);
+            const unwrapped = unwrapCoordinates(coordsToUnwrap);
+            
+            const allPoints = rawPoints.map((p, i) => ({
+                ...p,
+                longitude: unwrapped[i][0],
+                latitude: unwrapped[i][1]
+            }));
+
+            for (let i = 0; i < allPoints.length - 1; i++) {
+                const start = allPoints[i];
+                const end = allPoints[i+1];
+                
+                segments.push({
+                    type: 'Feature',
+                    geometry: {
+                        type: 'LineString',
+                        coordinates: [[start.longitude, start.latitude], [end.longitude, end.latitude]]
+                    },
+                    properties: {
+                        color: getColorFromAltitude(start.altitude)
+                    }
+                });
+            }
+
+            const routeSourceId = 'flight-history-source';
+            const routeLayerId = 'flight-history-layer';
+            
+            if (map.current.getSource(routeSourceId)) {
+                 map.current.getSource(routeSourceId).setData({
+                    type: 'FeatureCollection',
+                    features: segments
+                 });
+            } else {
+                map.current.addSource(routeSourceId, {
+                    type: 'geojson',
+                    data: {
+                        type: 'FeatureCollection',
+                        features: segments
+                    }
+                });
+
+                map.current.addLayer({
+                    id: routeLayerId,
+                    type: 'line',
+                    source: routeSourceId,
+                    layout: {
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    },
+                    paint: {
+                        'line-color': ['get', 'color'],
+                        'line-width': 3
+                    }
+                });
+                setCurrentPolyline([routeLayerId]);
+            }
+        }
+      } catch (error) {
+          console.error("Error updating trajectory:", error);
+      }
+  };
+
+  // Trajectory Auto-Update Effect
+  useEffect(() => {
+     if (selectedFlightId && flightsData) {
+         const flight = flightsData.find(f => f.flightId === selectedFlightId);
+         if (flight) {
+             updateTrajectory(flight);
+         }
+     }
+  }, [flightsData, selectedFlightId]);
 
   const savedUsername = localStorage.getItem('formUsername');
   const savedVAName = localStorage.getItem('vaName');
@@ -70,9 +171,7 @@ const MapSession = ({ sessionId, sessionName, onIconClick }) => {
     };
   };
 
-  // React Query Hooks
-  const { data: flightsData, error: flightsError } = useFlights(sessionId);
-  const { data: atcData, error: atcError } = useAtc(sessionId);
+
 
   // Marker Management (Diffing)
   useEffect(() => {
@@ -153,36 +252,12 @@ const MapSession = ({ sessionId, sessionName, onIconClick }) => {
             // Note: rotation is handled by marker.setRotation or manual transform depending on set-up.
             // setRotation() is the proper MapLibre way.
 
-            el.addEventListener('click', async (e) => {
+            el.addEventListener('click', (e) => {
                 e.stopPropagation();
                 removePolylines();
                 onIconClick(flight);
-                try {
-                    const route = await ApiService.getRoute(sessionId, flight.flightId);
-                    if (route && route.length > 0) {
-                        let coordinates = route.map(point => [point.longitude, point.latitude]);
-                        coordinates.push([longitude, latitude]);
-                        const correctedCoordinates = splitLineAtDateLine(coordinates);
-                        const newPolyline = [];
-                        correctedCoordinates.forEach((segment, index) => {
-                            const layerId = `flight-route-segment-${index}`;
-                            if (map.current.getLayer(layerId)) map.current.removeLayer(layerId);
-                            if (map.current.getSource(layerId)) map.current.removeSource(layerId);
-                            map.current.addSource(layerId, {
-                                type: 'geojson',
-                                data: { type: 'Feature', geometry: { type: 'LineString', coordinates: segment } }
-                            });
-                            map.current.addLayer({
-                                id: layerId,
-                                type: 'line',
-                                source: layerId,
-                                paint: { 'line-color': '#0000FF', 'line-width': 2 }
-                            });
-                            newPolyline.push(layerId);
-                        });
-                        setCurrentPolyline(newPolyline);
-                    }
-                } catch (error) { console.error(error); }
+                setSelectedFlightId(flight.flightId);
+                updateTrajectory(flight); // Initial draw
             });
 
             const newMarker = new maplibregl.Marker({ element: el })
@@ -392,40 +467,45 @@ const MapSession = ({ sessionId, sessionName, onIconClick }) => {
   }, [sessionId]);
 
   const removePolylines = () => {
+    setSelectedFlightId(null); // Clear selection so it stops auto-updating
+
+    // Clean History
     currentPolyline.forEach((layerId) => {
       if (map.current.getLayer(layerId)) map.current.removeLayer(layerId);
-      if (map.current.getSource(layerId)) map.current.removeSource(layerId);
+      
+      if (layerId === 'flight-history-layer') {
+          if (map.current.getSource('flight-history-source')) map.current.removeSource('flight-history-source');
+      } else {
+          if (map.current.getSource(layerId)) map.current.removeSource(layerId); 
+      }
     });
     setCurrentPolyline([]);
-    flightPlanPolyline.forEach((layerId) => {
-      if (map.current.getLayer(layerId)) map.current.removeLayer(layerId);
-      if (map.current.getSource(layerId)) map.current.removeSource(layerId);
-    });
-    setFlightPlanPolyline([]);
   };
 
 
-  // Função para dividir linha na Linha Internacional de Data
-  const splitLineAtDateLine = (points) => {
-    let splitLines = [];
-    let currentLine = [points[0]];
+  // Função para desenrolar coordenadas para a Date Line (Unwrap)
+  const unwrapCoordinates = (points) => {
+    if (!points || points.length === 0) return [];
+    
+    let unwrapped = [[points[0][0], points[0][1]]];
+    let showPrevLng = points[0][0];
+    let offset = 0;
 
     for (let i = 1; i < points.length; i++) {
-      const [prevLng, prevLat] = currentLine[currentLine.length - 1];
       const [currentLng, currentLat] = points[i];
+      let diff = currentLng - showPrevLng;
 
-      if (Math.abs(currentLng - prevLng) > 180) {
-        const adjustedLng = currentLng > 0 ? currentLng - 360 : currentLng + 360;
-        currentLine.push([adjustedLng, currentLat]);
-        splitLines.push(currentLine);
-        currentLine = [[currentLng, currentLat]];
-      } else {
-        currentLine.push([currentLng, currentLat]);
+      // Se o salto for muito grande, ajustamos o offset
+      if (diff > 180) {
+        offset -= 360;
+      } else if (diff < -180) {
+        offset += 360;
       }
-    }
 
-    splitLines.push(currentLine);
-    return splitLines;
+      unwrapped.push([currentLng + offset, currentLat]);
+      showPrevLng = currentLng;
+    }
+    return unwrapped;
   };
 
   return (

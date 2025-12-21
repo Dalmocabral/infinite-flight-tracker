@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { Menu } from "antd";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
+import { useEffect, useState } from "react";
 import { FaEarthAmericas, FaGear, FaServer } from "react-icons/fa6";
 
 
@@ -149,31 +149,59 @@ const Menulist = ({ onSelectServer, toggleSidebar }) => {
     window.location.reload(); // Recarrega a página
   };
 
+  // Menu Items Definition
+  const menuItems = [
+    {
+      key: 'server',
+      icon: <FaServer />,
+      label: 'Servers',
+      children: [
+        { key: 'casual', label: 'Casual server' },
+        { key: 'training', label: 'Training server' },
+        { key: 'expert', label: 'Expert server' },
+      ],
+    },
+    {
+      key: 'toggleinfo',
+      icon: <FaEarthAmericas />,
+      label: 'Toggle Info',
+    },
+    {
+      key: 'setting',
+      icon: <FaGear />,
+      label: 'Settings',
+    },
+  ];
+
+  // Menu Click Handler
+  const handleMenuClick = (e) => {
+      switch (e.key) {
+          case 'casual':
+          case 'training':
+          case 'expert':
+              onSelectServer(e.key);
+              break;
+          case 'toggleinfo':
+              toggleSidebar();
+              break;
+          case 'setting':
+              handleOpenDialog();
+              break;
+          default:
+              break;
+      }
+  };
+
   return (
     <>
       {/* Menu principal */}
-      <Menu theme="dark" className="menu-bar">
-        <Menu.SubMenu key="server" icon={<FaServer />} title="Servers">
-          {/* Opções de servidores */}
-          <Menu.Item key="casual" onClick={() => onSelectServer("casual")}>
-            Casual server
-          </Menu.Item>
-          <Menu.Item key="training" onClick={() => onSelectServer("training")}>
-            Training server
-          </Menu.Item>
-          <Menu.Item key="expert" onClick={() => onSelectServer("expert")}>
-            Expert server
-          </Menu.Item>
-        </Menu.SubMenu>
-        {/* Botão para alternar informações */}
-        <Menu.Item key="toggleinfo" icon={<FaEarthAmericas />} onClick={toggleSidebar}>
-          Toggle Info
-        </Menu.Item>
-        {/* Botão para abrir configurações */}
-        <Menu.Item key="setting" icon={<FaGear />} onClick={handleOpenDialog}>
-          Settings
-        </Menu.Item>
-      </Menu>
+      <Menu 
+          theme="dark" 
+          className="menu-bar" 
+          mode="inline" 
+          items={menuItems} 
+          onClick={handleMenuClick} 
+      />
 
       {/* Popup de configurações */}
       <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
