@@ -170,7 +170,8 @@ export const SidebarMenu = () => {
         <Menulist 
             onSelectServer={handleSelectServer} 
             toggleSidebar={toggleSidebar} 
-            togglePilotsSidebar={togglePilotsSidebar} 
+            togglePilotsSidebar={togglePilotsSidebar}
+            flightsData={flightsData} 
         />
       </Sider>
       
