@@ -2,6 +2,7 @@ import '@maptiler/sdk/dist/maptiler-sdk.css';
 import { useEffect, useRef, useState } from "react";
 import { useAircraftMarkers } from '../hooks/map/useAircraftMarkers';
 import { useAtcLayer } from '../hooks/map/useAtcLayer';
+import { useFlightPlan } from '../hooks/map/useFlightPlan';
 import { useMap } from '../hooks/map/useMap';
 import { useTrajectory } from '../hooks/map/useTrajectory';
 import { useAtc } from '../hooks/useAtc';
@@ -48,7 +49,10 @@ const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick, onMapRead
       updateTrajectoryLocal // Pass callback for sync update
   );
 
-  // 5. ATC Layer Hook
+  // 5. Flight Plan Hook
+  useFlightPlan(map, sessionId, selectedFlightId);
+
+  // 6. ATC Layer Hook
   useAtcLayer(map, atcData, sessionName, isMapLoaded, onAtcClick);
 
   // 6. Global Map Click Logic for Clearing Selection
@@ -92,6 +96,7 @@ const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick, onMapRead
       const onMapClick = (e) => {
           if (e.defaultPrevented) return;
           removePolylines();
+          setSelectedFlightId(null);
       };
 
       map.current.on('click', onMapClick);
