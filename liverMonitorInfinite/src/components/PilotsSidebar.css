@@ -1,0 +1,13 @@
+/* CSS for Pilots Sidebar / Dialog overrides */
+
+/* Most styling is now handled by Material UI PaperProps in PilotsSidebar.jsx */
+/* Keeping file for future custom animations or specific non-MUI needs */
+
+.pilot-count-badge {
+    background: #4dabf5;
+    color: #121212;
+    font-size: 0.8rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+}

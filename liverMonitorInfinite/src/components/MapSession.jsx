@@ -5,8 +5,6 @@ import { useAtcLayer } from '../hooks/map/useAtcLayer';
 import { useFlightPlan } from '../hooks/map/useFlightPlan';
 import { useMap } from '../hooks/map/useMap';
 import { useTrajectory } from '../hooks/map/useTrajectory';
-import { useAtc } from '../hooks/useAtc';
-import { useFlights } from '../hooks/useFlights';
 import "./MapSession.css";
 import ZuluClock from './ZuluClock';
 
@@ -14,13 +12,17 @@ import ZuluClock from './ZuluClock';
 // but we might need to pass savedUsername/savedVAName if we want to keep the component pure.
 // Currently useAircraftMarkers takes them as args.
 
-const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick, onMapReady }) => {
+const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick, onMapReady, flightsDataProp, atcDataProp }) => {
   const mapContainer = useRef(null);
   const [selectedFlightId, setSelectedFlightId] = useState(null);
   
-  // 1. Data Hooks
-  const { data: flightsData } = useFlights(sessionId);
-  const { data: atcData } = useAtc(sessionId);
+  // 1. Data Hooks (Removed - Received as props)
+  // const { data: flightsData } = useFlights(sessionId);
+  // const { data: atcData } = useAtc(sessionId);
+  
+  // Use Props directly
+  const flightsData = flightsDataProp;
+  const atcData = atcDataProp;
 
   // 2. Map Initialization Hook
   const { map, isMapLoaded } = useMap(mapContainer);

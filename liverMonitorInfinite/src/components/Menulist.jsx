@@ -1,6 +1,7 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { Menu } from "antd";
 import { useEffect, useState } from "react";
+import { FaUsers } from "react-icons/fa"; // Safe import
 import { FaEarthAmericas, FaGear, FaServer } from "react-icons/fa6";
 
 
@@ -94,7 +95,7 @@ const vaOptions = ['(selecione uma opção)',
   'UPS Virtual [UPSV]'
 ];
 
-const Menulist = ({ onSelectServer, toggleSidebar }) => {
+const Menulist = ({ onSelectServer, toggleSidebar, togglePilotsSidebar }) => {
   // Estado para controle do diálogo (popup)
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -164,7 +165,12 @@ const Menulist = ({ onSelectServer, toggleSidebar }) => {
     {
       key: 'toggleinfo',
       icon: <FaEarthAmericas />,
-      label: 'Toggle Info',
+      label: 'Server Info',
+    },
+    {
+      key: 'pilots',
+      icon: <FaUsers />, // Requires import
+      label: 'Pilots',
     },
     {
       key: 'setting',
@@ -183,6 +189,9 @@ const Menulist = ({ onSelectServer, toggleSidebar }) => {
               break;
           case 'toggleinfo':
               toggleSidebar();
+              break;
+          case 'pilots':
+              togglePilotsSidebar();
               break;
           case 'setting':
               handleOpenDialog();

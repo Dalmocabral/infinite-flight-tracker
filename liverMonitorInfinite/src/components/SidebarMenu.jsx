@@ -1,9 +1,12 @@
 import { Layout } from 'antd';
 import React, { useRef, useState } from 'react';
+import { useAtc } from '../hooks/useAtc'; // Import Hook
+import { useFlights } from '../hooks/useFlights'; // Import Hook
 import AtcInfoSidebar from './AtcInfoSidebar';
 import Logo from './Logo';
 import MapSession from './MapSession';
 import Menulist from './Menulist';
+import PilotsSidebar from './PilotsSidebar'; // Import New Sidebar
 import SessionInfoSidebar from './SessionInfoSidebar';
 import "./SidebarMenu.css";
 import UserInfoSidebar from './UserInfoSidebar';
@@ -22,6 +25,10 @@ export const SidebarMenu = () => {
   // State for the selected server
   // Estado para o servidor selecionado
   const [selectedServer, setSelectedServer] = useState('expert');
+
+  // Hoisted Data Hooks (Shared between Map and Pilots List)
+  const { data: flightsData } = useFlights(sessions[selectedServer].id);
+  const { data: atcData } = useAtc(sessions[selectedServer].id);
   
   // State for sidebar visibility
   // Estado para a visibilidade da barra lateral
@@ -33,6 +40,9 @@ export const SidebarMenu = () => {
 
   // State for ATC sidebar visibility
   const [atcSidebarVisible, setAtcSidebarVisible] = useState(false);
+
+  // State for Pilots sidebar visibility
+  const [pilotsSidebarVisible, setPilotsSidebarVisible] = useState(false);
 
   // State for selected flight
   // Estado para o voo selecionado
@@ -48,6 +58,9 @@ export const SidebarMenu = () => {
   // Ref for ATC Sidebar
   const atcSidebarRef = useRef(null);
 
+  // Ref for Pilots Sidebar (No longer needed for Dialog)
+  // const pilotsSidebarRef = useRef(null);
+
   // Handles server selection
   // Manipula a seleção do servidor
   const handleSelectServer = (serverKey) => {
@@ -61,6 +74,7 @@ export const SidebarMenu = () => {
     setUserSidebarVisible(true);
     setAtcSidebarVisible(false);
     setSidebarVisible(false); // Hide Session Sidebar on selection
+    setPilotsSidebarVisible(false); // Hide Pilots list if selecting from map
   };
 
   const handleAtcClick = (atc) => {
@@ -68,6 +82,32 @@ export const SidebarMenu = () => {
       setAtcSidebarVisible(true);
       setUserSidebarVisible(false); // Close user/flight if open
       setSidebarVisible(false); // Hide Session Sidebar on selection
+      setPilotsSidebarVisible(false);
+  };
+
+  const handleSelectPilot = (flight) => {
+      // Called when clicking a pilot in the list
+      setSelectedFlight(flight);
+      setUserSidebarVisible(true);
+      setPilotsSidebarVisible(false); // Close list, show user info
+      setSidebarVisible(false);
+      setAtcSidebarVisible(false);
+
+      if (mapActions.current && mapActions.current.flyTo) {
+          mapActions.current.flyTo(flight.latitude, flight.longitude, 10);
+      }
+  };
+
+  const togglePilotsSidebar = () => {
+      if (pilotsSidebarVisible) {
+          setPilotsSidebarVisible(false);
+          setSidebarVisible(true);
+      } else {
+          setPilotsSidebarVisible(true);
+          setSidebarVisible(false); // Hide others
+          setUserSidebarVisible(false);
+          setAtcSidebarVisible(false);
+      }
   };
 
   // Detects clicks outside the UserInfoSidebar and hides it
@@ -84,6 +124,8 @@ export const SidebarMenu = () => {
        setAtcSidebarVisible(false);
        setSidebarVisible(true); // Restore Session Sidebar
     }
+
+    // Pilots Dialog handles its own backdrop click via onClose
   };
 
   
@@ -103,7 +145,7 @@ export const SidebarMenu = () => {
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [userSidebarVisible, atcSidebarVisible, sidebarVisible]); // Add dependencies to keep closure fresh
+  }, [userSidebarVisible, atcSidebarVisible, sidebarVisible, pilotsSidebarVisible]); // Add dependencies to keep closure fresh
 
   // Ref for Map Actions
   const mapActions = useRef(null);
@@ -125,7 +167,11 @@ export const SidebarMenu = () => {
       {/* Barra lateral com logo e lista de menus */}
       <Sider className='sidebar' collapsed={true} collapsible={false}>
         <Logo />
-        <Menulist onSelectServer={handleSelectServer} toggleSidebar={toggleSidebar} />
+        <Menulist 
+            onSelectServer={handleSelectServer} 
+            toggleSidebar={toggleSidebar} 
+            togglePilotsSidebar={togglePilotsSidebar} 
+        />
       </Sider>
       
       <Layout>
@@ -135,7 +181,7 @@ export const SidebarMenu = () => {
           <div 
              className="sidebar-content-wrapper" 
              style={{ 
-                width: (sidebarVisible || userSidebarVisible || atcSidebarVisible) ? '350px' : '0px',
+                width: (sidebarVisible || userSidebarVisible || atcSidebarVisible || pilotsSidebarVisible) ? '350px' : '0px',
                 transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                 overflow: 'hidden',
                 flexShrink: 0,
@@ -175,6 +221,8 @@ export const SidebarMenu = () => {
                     }}
                  />
               )}
+
+              {/* Pilots Sidebar removed from here */}
           </div>
           
           {/* Map session component (Fills remaining space) */}
@@ -184,7 +232,20 @@ export const SidebarMenu = () => {
             onIconClick={handleMapIconClick} 
             onAtcClick={handleAtcClick}
             onMapReady={handleMapReady}
+            flightsDataProp={flightsData} // Pass fetched data
+            atcDataProp={atcData}         // Pass fetched data
           />
+
+           {/* Pilots Sidebar (Dialog) */}
+           {pilotsSidebarVisible && (
+              <PilotsSidebar 
+                  isVisible={pilotsSidebarVisible}
+                  flightsData={flightsData}
+                  onSelectFlight={handleSelectPilot}
+                  onClose={togglePilotsSidebar} // Pass close handler
+                  selectedFlightId={selectedFlight ? selectedFlight.flightId : null}
+              /> 
+          )}
         </div>
       </Layout>
     </Layout>
