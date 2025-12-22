@@ -181,10 +181,19 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
     const fetchUserStatus = async () => {
       const status = await ApiService.userStatus(flightData.userId);
       if (status) {
+        let avatarUrl = null;
+        // Construct Avatar URL if available
+        if (status.discourseUser && status.discourseUser.avatarTemplate) {
+            // Replace {size} with desired pixel size (e.g. 128)
+            // Prepend absolute domain
+            avatarUrl = `https://community.infiniteflight.com${status.discourseUser.avatarTemplate.replace('{size}', '128')}`;
+        }
+
         setUserStatus({
           xp: status.xp || 0,
           grade: status.grade || "N/A",
           flightTime: convertMinutesToHHMM(status.flightTime) || "0:00",
+          avatarUrl: avatarUrl
         });
       }
     };
@@ -282,6 +291,16 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
         </div>
       </div>
       <div className="inforusername">
+        {userStatus.avatarUrl && (
+             <div className="user-avatar-container">
+                 <img 
+                    src={userStatus.avatarUrl} 
+                    alt={flightData.username} 
+                    className="user-avatar-img" 
+                    onError={(e) => e.target.style.display = 'none'} // Hide if broken
+                 />
+             </div>
+        )}
         <span className="username-large">
           {flightData.username || "Anonymous User"}
           {isStaff && <FaShieldAlt className="staff-icon" />} {/* Ícone de escudo */}

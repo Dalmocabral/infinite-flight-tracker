@@ -236,6 +236,27 @@
   margin-bottom: 4px;
 }
 
+.user-avatar-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.user-avatar-img {
+    width: 80px; /* Slightly larger for prominence */
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.user-avatar-img:hover {
+    transform: scale(1.05);
+    border-color: #4ade80; /* Green accent on hover */
+}
+
 .usernamevavo {
   font-size: 14px;
   color: #aaa;
