@@ -1,48 +1,88 @@
 .atc-info-sidebar {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 350px;
+    /* position: absolute; right: 0;  <-- REMOVED to align Left */
+    width: 350px; /* Fixed width to prevent re-flow during slide */
+    min-width: 350px; /* Ensure it stays fixed during wrapper transition */
     height: 100vh;
-    background-color: #1a1a1a;
+    background-color: rgba(20, 20, 20, 0.95); /* Deep dark background */
+    backdrop-filter: blur(12px); /* Glassmorphism */
     color: #e0e0e0;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4); /* Shadow to Right */
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 32px; /* Increased from 20px */
     overflow-y: auto;
-    transition: transform 0.3s ease-in-out;
+    /* content-box or border-box? Global is border-box. Safe. */
+    flex-shrink: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+    /* ANIMATION */
+    animation: slideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+    /* Hide Scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.atc-info-sidebar::-webkit-scrollbar {
+    display: none;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .atc-info-header {
-    margin-bottom: 20px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 15px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 16px;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .close-btn {
     position: absolute;
-    top: 0;
-    right: 0;
-    background: none;
+    top: -5px;
+    right: -5px;
+    background: rgba(255, 255, 255, 0.1);
     border: none;
     color: #fff;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .atc-info-header h3 {
     margin: 0;
-    color: #4dabf5; /* Light blue accent */
-    font-size: 1.5rem;
+    color: #fff; 
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 1px;
 }
 
 .atc-info-header h5 {
-    margin: 5px 0;
-    font-size: 1.2rem;
-    color: #fff;
+    margin: 0;
+    font-size: 1rem;
+    color: #4dabf5; /* Keep Accent */
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
 .atc-info-content {
@@ -51,74 +91,98 @@
     gap: 20px;
 }
 
+/* Sections */
 .atc-info-section {
-    background: #252525;
-    padding: 15px;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .section-title {
     display: block;
-    font-size: 0.9rem;
-    color: #888;
+    font-size: 0.8rem;
+    color: #aaa;
     text-transform: uppercase;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #444;
-    padding-bottom: 5px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
+/* ATIS Text */
 .atis-text {
-    font-family: monospace;
-    white-space: pre-wrap;
-    background: #111;
-    padding: 10px;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    color: #ddd;
+    font-family: 'Roboto Mono', monospace;
+    white-space: pre-wrap;       /* Preserve newlines */
+    word-wrap: break-word;       /* Break long words */
+    overflow-wrap: break-word;   /* Modern standard */
+    word-break: break-word;      /* Force break if needed */
+    background: rgba(0, 0, 0, 0.3);
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #bfdbfe; /* Light Blue Text */
+    line-height: 1.4;
+    border-left: 3px solid #1e40af;
 }
 
+/* NOTAMs */
 .notam-item {
-    background: #333;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
 }
 
 .notam-item h4 {
-    margin: 0 0 5px 0;
-    color: #ffca28; /* Amber for warning/info */
-    font-size: 1rem;
+    margin: 0 0 6px 0;
+    color: #fbbf24; /* Amber */
+    font-size: 0.95rem;
+    font-weight: 600;
 }
 
 .notam-author {
-    font-size: 0.8rem;
-    color: #aaa;
-    margin-top: 5px;
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 6px;
+    display: block;
+    text-align: right;
+    font-style: italic;
 }
 
+/* Stats */
 .traffic-stats {
     display: flex;
     justify-content: space-around;
+    gap: 10px;
 }
 
 .stat-box {
     text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 8px;
+    flex: 1;
 }
 
 .stat-value {
     display: block;
-    font-size: 1.5rem;
-    font-weight: bold;
+    font-size: 1.4rem;
+    font-weight: 800;
     color: #fff;
+    margin-bottom: 4px;
 }
 
 .stat-label {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: #aaa;
+    text-transform: uppercase;
 }
 
 .time-stat {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #ccc;
-    margin-top: 5px;
+    margin-top: 6px;
+    text-align: center;
 }

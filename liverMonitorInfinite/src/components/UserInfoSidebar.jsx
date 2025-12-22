@@ -1,16 +1,15 @@
-import React, { forwardRef, useState, useEffect } from 'react';
-import "./UserInfoSidebar.css";
-import liveries from "./ImageAirplane.json";
-import getAircraft from "./GetAircraft.json";
-import stremeruser from "./Stremer.json";
-import ApiService from './ApiService'; // Importe o objeto ApiService
-import defaultImage from "../assets/ovni.png"; // Imagem padrão
-import { CiPaperplane } from "react-icons/ci";
-import { IoIosAirplane } from "react-icons/io";
-import { FaYoutube, FaTwitch } from "react-icons/fa6"; // Importar ícones
-import staffList from "./Staff.json";
-import { FaShieldAlt } from "react-icons/fa"; // Ícone de escudo
+import { forwardRef, useEffect, useState } from 'react';
 import { Chart } from "react-google-charts"; // Importando o componente do Google Charts
+import { CiPaperplane } from "react-icons/ci";
+import { FaShieldAlt } from "react-icons/fa"; // Ícone de escudo
+import { FaPlane, FaTwitch, FaYoutube } from "react-icons/fa6"; // Import FaPlane
+import defaultImage from "../assets/ovni.png"; // Imagem padrão
+import ApiService from './ApiService'; // Importe o objeto ApiService
+import getAircraft from "./GetAircraft.json";
+import liveries from "./ImageAirplane.json";
+import staffList from "./Staff.json";
+import stremeruser from "./Stremer.json";
+import "./UserInfoSidebar.css";
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371e3; // Raio da Terra em metros
@@ -224,7 +223,7 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
           <span>{firstWaypoint}</span>
           <div className="progress-bar">
             <div className="progress" style={{ width: `${progress}%` }}></div>
-            <IoIosAirplane className="progress-icon" style={{ left: `${progress}%` }} />
+            <FaPlane className="progress-icon" style={{ left: `${progress}%` }} />
           </div>
           <span>{lastWaypoint}</span>
         </div>

@@ -325,7 +325,13 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
                          clickedAtc = atcDataRef.current.find(a => a.airportName === atcId);
                     }
 
-                    if (clickedAtc) onAtcClick(clickedAtc);
+                    if (clickedAtc) {
+                        onAtcClick(clickedAtc);
+                        // Prevent document click listener (handleClickOutside) from firing and messing up state
+                        if (e.originalEvent) {
+                            e.originalEvent.stopPropagation();
+                        }
+                    }
                 }
             }
         };

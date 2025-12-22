@@ -1,263 +1,275 @@
-/* Estilos da sidebar principal */
-.session-info-sidebar {
-  position: absolute;
-  width: 300px;
-  height: 100%;
-  background: #1a1919;
-  z-index: 1;
-}
-
-/* Estilos da UserInfoSidebar */
+/* Main Sidebar Container */
 .user-info-sidebar {
-  position: absolute;
-  left: 0;
-  width: 300px;
-  height: 100%;
-  background: #1f1f1f;
+  /* position: absolute;  <-- REMOVED to match SessionSidebar flow */
+  /* left: 0; */
+  width: 350px; 
+  min-width: 350px; /* Prevent reflow during animation */
+  height: 100vh; /* Changed from 100% to match viewport */
+  background-color: rgba(20, 20, 20, 0.95); 
+  backdrop-filter: blur(12px); 
   z-index: 2;
-  overflow-y: auto; /* Permite scroll do mouse */
+  overflow-y: auto;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #e0e0e0;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+  flex-shrink: 0; /* Prevent shrinking in flex container */
 
+  /* HIDE SCROLLBARS */
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+
+  /* ANIMATION */
+  animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Estilos para a imagem da Livery */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.user-info-sidebar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* Livery Image Section */
 .imageLivery {
   width: 100%;
-  height: auto;
+  height: 220px;
   overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .imageLivery img {
-  
-  height: 200px; /* Defina a altura que desejar */
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   display: block;
-  border-radius: 0;
 }
 
-/* Estilos para o callsign do usuário */
+/* Callsign Header */
 .usercallsign {
-  display: flex; /* Define o layout como flexbox */
-  align-items: center; /* Centraliza verticalmente */
-  justify-content: center; /* Centraliza horizontalmente */
-  gap: 10px; /* Espaço entre o logo e o texto */
-  background-color: #03459c; /* Cor de fundo (opcional) */
-  padding: 10px; /* Espaço interno */
-  color: #fff; /* Cor do texto */
-  font-size: 20px; /* Tamanho do texto */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #0050b3 0%, #003a8c 100%);
+  padding: 16px;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(0, 50, 150, 0.3);
+  margin-bottom: 24px;
 }
 
+.airplane-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
 
 .circuloIcon {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background-color: #fff;
-  color: #000;
-  margin-right: 10px;
-  font-size: 24px;
-}
-
-/* Estilos para a rota do usuário */
-.userroute {
-  background-color: #1868d1;
-  padding: 10px;
-
-  height: auto;
-}
-
-.userroute span {
-  font-size: 20px;
+  background-color: rgba(255, 255, 255, 0.2);
   color: #fff;
+  font-size: 18px;
 }
 
-/* Estilos para o container de progresso */
+/* Route Progress */
+.userroute {
+  background: rgba(255, 255, 255, 0.05); /* Subtle background */
+  padding: 16px;
+  margin-bottom: 2px; /* Connects visually with progress bar if needed, or separate */
+}
+
 .progress-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #1868d1;
-  padding: 10px;
-  border-radius: 10px;
-  
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.progress-container span {
+  font-weight: 700;
+  color: #fff;
+  font-size: 16px;
 }
 
 .progress-bar {
   flex-grow: 1;
   height: 6px;
-  background-color: #333;
-  margin: 0 5px;
-  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 0 12px;
+  border-radius: 4px;
   position: relative;
 }
 
 .progress {
-  background-color: #4caf50;
+  background-color: #4ade80; /* Bright Green */
   height: 100%;
-  border-radius: 5px;
+  border-radius: 4px;
   position: relative;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
 }
 
 .progress-icon {
   color: #fff;
   position: absolute;
-  top: -4px;
-  transform: translateX(-50%);
+  top: -6px;
+  transform: translateX(-50%); /* Removed rotation to test default orientation */
+  font-size: 16px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
 
-/* Estilos para informações do voo */
+/* Flight Info Grid */
 .col-info-flight-user {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 0 10px;
-  color: #fff;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  padding: 0 16px;
+  margin-bottom: 24px;
+  margin-top: 24px; /* Added spacing from top elements */
 }
 
-.info-box {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  background-color: rgb(45, 45, 46);
+.info-box, .info-box-user {
+  padding: 12px 8px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
   text-align: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-top: 20px;
-  
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: transform 0.2s, background-color 0.2s;
 }
 
-.info-box span {
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.info-box p {
-  font-size: 10px;
-  margin: 0;
-  color: #666;
+.info-box:hover, .info-box-user:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
 }
 
 .info-box-user {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  background-color: rgb(110, 110, 240);
-  text-align: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 20px;
+  background-color: rgba(70, 70, 180, 0.25); /* Tinted for User Stats */
+  border-color: rgba(100, 100, 255, 0.2);
 }
 
-/* Estilos para a rota */
-.route-info-user {
-  margin-top: 20px;
-  padding: 10px;
-  background-color: rgb(45, 45, 46);
-  border-radius: 10px;
-  margin-left: 10px;
-  margin-right: 10px;
+.info-box span, .info-box-user span {
+  font-size: 15px;
+  font-weight: 700;
   color: #fff;
+  margin-bottom: 4px;
+}
+
+.info-box p, .info-box-user p {
+  font-size: 10px;
+  margin: 0;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+/* Route Waypoints */
+.route-info-user {
+  margin: 0 16px 24px 16px;
+  padding: 16px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.route-info-user > span {
+  display: block;
+  font-size: 11px;
+  color: #888;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .waypoints-container {
-  margin-top: 10px;
-  font-size: 12px;
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-
+  gap: 6px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  color: #e0e0e0;
 }
 
-/* Estilos para o nome de usuário */
+.waypoint {
+  color: #bfdbfe; /* Light Blue */
+}
+
+/* User Profile & Socials */
 .inforusername {
-  margin-top: 20px;
-  padding: 10px;
-  background-color: rgb(45, 45, 46);
-  border-radius: 10px;
+  margin: 0 16px 16px 16px;
+  padding: 16px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
   text-align: center;
-  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.username-large {
+  font-size: 18px;
+  font-weight: 700;
   color: #fff;
-  
-}
-
-/* Estilos para ícones de streaming */
-.stream-icons {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 8px;
-  font-size: 30px;
-}
-
-.stream-icons a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.inforusername {
-  margin-top: 20px;
-  padding: 10px;
-  background-color: rgb(45, 45, 46); 
-  border-radius: 10px;
-  text-align: center;
-  margin-bottom: 0px;
-  margin-left: 10px;
-  margin-right: 10px;
-}
-
-.stream-icons {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 8px;
-  font-size: 40px;
-}
-
-.stream-icons a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.staff-icon {
-  
-  margin-left: 5px; /* Espaço entre o nome e o ícone */
-  font-size: 1.2rem; /* Tamanho do ícone */
-}
-
-.airplane-logo {
-  width: 45px; /* Tamanho do logo */
-  height: 45px;
-  object-fit: contain; /* Garante que a imagem não distorça */
-}
-
-.callsign-text {
-  white-space: nowrap; /* Impede que o texto quebre em várias linhas */
-  font-size: inherit; /* Usa o tamanho de fonte do contêiner */
-}
-
-/* Estilos para o nome de usuário */
-.inforusername {
-  margin-top: 20px;
-  padding: 10px;
-  background-color: rgb(45, 45, 46);
-  border-radius: 10px;
-  text-align: center;
-  margin-bottom: 16px;
-  color: #fff;
-  
+  display: block;
+  margin-bottom: 4px;
 }
 
 .usernamevavo {
-  font-size: 1.3rem;
+  font-size: 14px;
+  color: #aaa;
+  font-weight: 500;
+}
+
+.stream-icons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.stream-icon {
+  font-size: 24px;
+  transition: color 0.2s;
+}
+
+.stream-icon:hover {
+  color: #fff;
+}
+
+.staff-icon {
+  margin-left: 6px;
+  color: #f59e0b; /* Gold */
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+/* Chart Container */
+.inforchart {
+  margin: 0 16px 32px 16px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }

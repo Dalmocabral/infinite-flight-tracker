@@ -12,6 +12,9 @@
 
 .sidebar {
     color: #fff;
+    z-index: 2000; /* Ensure it stays ON TOP of content sidebars */
+    position: relative;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.5); /* Optional: visual separation */
 }
 
 .logo {
@@ -45,19 +48,5 @@
 
 }
 
-.session-info-sidebar {
-    width: 300px; /* Defina a largura que deseja */
-    background-color: #161616;
-    padding: 10px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    z-index: 1000; /* Certifique-se de que esteja acima do mapa */
-  }
-  
-  .map-session {
-    flex-grow: 1;
-    margin-left: 300px; /* Ajuste para a largura do sidebar */
-  }
+/* Legacy styles removed to use dedicated CSS files */
   

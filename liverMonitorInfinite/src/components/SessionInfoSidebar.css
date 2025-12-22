@@ -3,7 +3,8 @@
   background-color: rgba(20, 20, 20, 0.95); /* Deep dark background */
   backdrop-filter: blur(12px); /* Glassmorphism */
   padding: 24px;
-  width: 320px;
+  width: 350px;
+  min-width: 350px; /* Prevent reflow */
   height: 100vh;
   overflow-y: auto;
   color: #e0e0e0;
@@ -11,12 +12,26 @@
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
   
   /* HIDE SCROLLBARS */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; 
+  -ms-overflow-style: none;
+
+  /* ANIMATION */
+  animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .session-info-sidebar::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none; 
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 /* Header Section */

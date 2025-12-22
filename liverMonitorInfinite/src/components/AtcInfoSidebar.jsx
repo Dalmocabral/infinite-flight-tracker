@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import ApiService from "./ApiService";
 import "./AtcInfoSidebar.css";
 
-const AtcInfoSidebar = ({ atc, sessionId, onClose }) => {
+const AtcInfoSidebar = forwardRef(({ atc, sessionId, onClose }, ref) => {
   const [atisInfo, setAtisInfo] = useState(null);
   const [notams, setNotams] = useState([]);
   const [airportStatus, setAirportStatus] = useState({
@@ -56,9 +56,8 @@ const AtcInfoSidebar = ({ atc, sessionId, onClose }) => {
   if (!atc) return null;
 
   return (
-    <div className={`atc-info-sidebar ${atc ? 'open' : ''}`}>
+    <div className={`atc-info-sidebar ${atc ? 'open' : ''}`} ref={ref}>
       <div className="atc-info-header">
-        <button className="close-btn" onClick={onClose}>&times;</button>
         <h3>
           {
             [
@@ -128,6 +127,6 @@ const AtcInfoSidebar = ({ atc, sessionId, onClose }) => {
       </div>
     </div>
   );
-};
+});
 
 export default AtcInfoSidebar;

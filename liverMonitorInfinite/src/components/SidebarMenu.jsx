@@ -57,26 +57,33 @@ export const SidebarMenu = () => {
   // Handles map icon click to show flight details
   // Manipula o clique no ícone do mapa para mostrar os detalhes do voo
   const handleMapIconClick = (flight) => {
-    setSelectedFlight(flight); // Stores the selected flight / Armazena o voo selecionado
+    setSelectedFlight(flight);
     setUserSidebarVisible(true);
-    setAtcSidebarVisible(false); // Close ATC if open
+    setAtcSidebarVisible(false);
+    setSidebarVisible(false); // Hide Session Sidebar on selection
   };
 
   const handleAtcClick = (atc) => {
       setSelectedAtc(atc);
       setAtcSidebarVisible(true);
       setUserSidebarVisible(false); // Close user/flight if open
+      setSidebarVisible(false); // Hide Session Sidebar on selection
   };
 
   // Detects clicks outside the UserInfoSidebar and hides it
   // Detecta cliques fora do UserInfoSidebar e o oculta
   const handleClickOutside = (event) => {
-    if (userSidebarRef.current && !userSidebarRef.current.contains(event.target)) {
+    // If clicking outside User Sidebar while it is open
+    if (userSidebarVisible && userSidebarRef.current && !userSidebarRef.current.contains(event.target)) {
       setUserSidebarVisible(false);
+      setSidebarVisible(true); // Restore Session Sidebar
     }
-    // Logic for ATC sidebar outside click? Maybe redundant if we use close button primarily
-    // But let's add it for consistency if desired.
-    // NOTE: Map clicks might trigger this if we are not careful about propagation.
+    
+    // If clicking outside ATC Sidebar while it is open
+    if (atcSidebarVisible && atcSidebarRef.current && !atcSidebarRef.current.contains(event.target)) {
+       setAtcSidebarVisible(false);
+       setSidebarVisible(true); // Restore Session Sidebar
+    }
   };
 
   
@@ -89,12 +96,14 @@ export const SidebarMenu = () => {
 
   // Adds an event listener to detect outside clicks
   // Adiciona um listener de eventos para detectar cliques fora do componente
+  // Adds an event listener to detect outside clicks
+  // Adiciona um listener de eventos para detectar cliques fora do componente
   React.useEffect(() => {
     document.addEventListener('click', handleClickOutside);
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, []);
+  }, [userSidebarVisible, atcSidebarVisible, sidebarVisible]); // Add dependencies to keep closure fresh
 
   // Ref for Map Actions
   const mapActions = useRef(null);
@@ -121,18 +130,54 @@ export const SidebarMenu = () => {
       
       <Layout>
         <div style={{ display: 'flex', flexGrow: 1, position: 'relative' }}>
-          {/* Session Info Sidebar */}
-          {/* Barra lateral com informações da sessão */}
-          {sidebarVisible && (
-            <SessionInfoSidebar
-              sessionName={sessions[selectedServer].name}
-              sessionId={sessions[selectedServer].id}
-              onAirportSelect={handleAirportSelect}
-            />
-          )}
           
-          {/* Map session component */}
-          {/* Componente da sessão do mapa */}
+          {/* Sidebar Content Container - Static Width to prevent Map Blink */}
+          <div 
+             className="sidebar-content-wrapper" 
+             style={{ 
+                width: (sidebarVisible || userSidebarVisible || atcSidebarVisible) ? '350px' : '0px',
+                transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                overflow: 'hidden',
+                flexShrink: 0,
+                position: 'relative',
+                background: '#161616', /* Dark background to prevent white flash */
+                height: '100vh'
+             }}
+          >
+              {/* Session Info Sidebar */}
+              {sidebarVisible && (
+                <SessionInfoSidebar
+                  sessionName={sessions[selectedServer].name}
+                  sessionId={sessions[selectedServer].id}
+                  onAirportSelect={handleAirportSelect}
+                />
+              )}
+
+              {/* User Info Sidebar */}
+              {userSidebarVisible && selectedFlight && (
+                <UserInfoSidebar 
+                  ref={userSidebarRef} 
+                  isVisible={userSidebarVisible} 
+                  flightData={selectedFlight} 
+                  sessionId={sessions[selectedServer].id} 
+                />
+              )}
+
+              {/* ATC Info Sidebar */}
+              {atcSidebarVisible && selectedAtc && (
+                 <AtcInfoSidebar
+                    ref={atcSidebarRef}
+                    atc={selectedAtc}
+                    sessionId={sessions[selectedServer].id}
+                    onClose={() => {
+                        setAtcSidebarVisible(false);
+                        setSidebarVisible(true);
+                    }}
+                 />
+              )}
+          </div>
+          
+          {/* Map session component (Fills remaining space) */}
           <MapSession 
             sessionId={sessions[selectedServer].id} 
             sessionName={sessions[selectedServer].name}
@@ -140,26 +185,6 @@ export const SidebarMenu = () => {
             onAtcClick={handleAtcClick}
             onMapReady={handleMapReady}
           />
-          
-          {/* User Info Sidebar */}
-          {/* Barra lateral com informações do usuário */}
-          {userSidebarVisible && selectedFlight && (
-            <UserInfoSidebar 
-              ref={userSidebarRef} 
-              isVisible={userSidebarVisible} 
-              flightData={selectedFlight} // Pass flight data / Passa os dados do voo
-              sessionId={sessions[selectedServer].id} // Pass session ID / Passa o ID da sessão
-            />
-          )}
-
-          {/* ATC Info Sidebar */}
-          {atcSidebarVisible && selectedAtc && (
-             <AtcInfoSidebar
-                atc={selectedAtc}
-                sessionId={sessions[selectedServer].id}
-                onClose={() => setAtcSidebarVisible(false)}
-             />
-          )}
         </div>
       </Layout>
     </Layout>
