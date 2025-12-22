@@ -1,153 +1,193 @@
-/* Estilo do container principal do sidebar */
+/* Main Sidebar Container */
 .session-info-sidebar {
-  background-color: #1f1f1f;
-  padding: 20px;
-  width: 300px;
-  max-height: 100vh;
-  overflow-y: auto; /* Permite scroll do mouse */
- 
- 
+  background-color: rgba(20, 20, 20, 0.95); /* Deep dark background */
+  backdrop-filter: blur(12px); /* Glassmorphism */
+  padding: 24px;
+  width: 320px;
+  height: 100vh;
+  overflow-y: auto;
+  color: #e0e0e0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+  
+  /* HIDE SCROLLBARS */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
 }
 
-
-
-.session-info-sidebar::-webkit-scrollbar-track {
-  background: transparent; /* Fundo transparente para garantir que a barra não apareça */
+.session-info-sidebar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
 
-.session-info-sidebar::-webkit-scrollbar-thumb {
-  background: transparent; /* Fundo transparente para garantir que a barra não apareça */
-}
-
-/* Cabeçalho do sidebar */
+/* Header Section */
 .statistics-header {
-  background-color: #03459c;
-  padding: 15px;
+  background: linear-gradient(135deg, #0050b3 0%, #003a8c 100%);
+  padding: 20px;
   text-align: center;
-  border-radius: 10px;
-  margin-bottom: 20px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 50, 150, 0.3);
 }
 
-.statistics-header h3,
+.statistics-header h3 {
+  margin: 0 0 4px 0;
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
 .statistics-header p {
   margin: 0;
-  color: white;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  font-weight: 500;
 }
 
-/* Nome da sessão */
+/* Session Name */
 .name-session h4 {
-  margin: 0;
-  font-size: 20px;
+  margin: 0 0 8px 0;
+  font-size: 22px;
   color: #fff;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* User Count */
+.session-count-user {
+  margin-bottom: 32px;
   text-align: center;
 }
 
-/* Contagem de usuários na sessão */
-.session-count-user {
-  margin: 15px 0;
-  text-align: center;
-  color: #fff;
+.session-count-user p {
+  background: rgba(255, 255, 255, 0.05);
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #aaa;
 }
 
 .session-count-user span {
-  color: #12a13b;
-  font-weight: bold;
+  color: #4ade80; /* Bright Green */
+  font-weight: 700;
+  font-size: 15px;
+  margin-right: 6px;
 }
 
-/* Seção do gráfico de aeronaves populares */
-.chart-section {
-  margin: 20px 0;
-}
-
-.grafic-header h4 {
-  margin: 10px 0;
+/* Titles */
+h4 {
   color: #fff;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  opacity: 0.8;
   text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 8px;
+}
+
+/* Chart Section */
+.chart-section {
+  margin-bottom: 32px;
 }
 
 .chart-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 220px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 16px;
+  padding: 10px;
 }
 
-/* Seção de aeroportos populares */
-.statistics-section {
-  margin-bottom: 20px;
+/* Lists & Tables */
+.statistics-section,
+.statistics-section-atc {
+  margin-bottom: 32px;
 }
 
-.statistics-section h4 {
-  margin: 0 0 10px 0;
-  font-size: 18px;
-  color: #fff;
-  text-align: center;
+.airport-table-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 12px 8px 12px;
+  font-size: 11px;
+  color: #666;
+  text-transform: uppercase;
+  font-weight: 600;
 }
 
-.airport-table-header,
 .airport-stat {
   display: flex;
   justify-content: space-between;
-  padding: 10px;
-  background-color: #282828;
-  border-radius: 5px;
-  margin-bottom: 5px;
-  font-size: 14px;
+  align-items: center;
+  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  transition: transform 0.2s, background-color 0.2s;
 }
 
-.airport-table-header span {
-  color: #bbb;
+.airport-stat:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(4px);
 }
 
-.inbound {
-  flex: 1;
-  text-align: left;
+/* Airport Table Column Data */
+.inbound, .outbound {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 500;
+  width: 40px;
 }
 
-.outbound {
-  flex: 1;
-  text-align: right;
-}
-
-.airport {
-  flex: 2;
-  text-align: center;
+.inbound { text-align: left; color: #60a5fa; } /* Blue */
+.outbound { text-align: right; color: #f87171; } /* Red */
+.airport { 
+  flex: 1; 
+  text-align: center; 
+  font-weight: 700; 
   color: #fff;
+  letter-spacing: 0.5px;
 }
 
-/* Seção de status ATC */
-.statistics-section-atc h4 {
-  margin: 20px 0 10px 0;
-  font-size: 18px;
-  color: #fff;
-  text-align: center;
-}
-
+/* ATC Badges Flex - No Gaps */
 .statistics-section-atc ul {
   list-style: none;
   padding: 0;
-  overflow-x: auto; /* Permite rolar horizontalmente se necessário */
 }
 
-.statistics-section-atc ul li {
-  background-color: #282828;
-  margin-bottom: 5px;
-  padding: 10px;
-  border-radius: 5px;
+.atc-status {
   display: flex;
-  justify-content: space-between;
-  align-items: center; /* Centraliza verticalmente */
-  color: #fff;
+  gap: 4px;
+  flex: 2;
+  align-items: center;
+  flex-wrap: wrap; /* Allow wrapping if many tags */
+  justify-content: flex-start; /* Left align */
 }
 
-.statistics-section-atc .airport {
-  text-align: left; /* Alinha o nome do aeroporto à esquerda */
-  flex: 1; /* Permite que o nome ocupe o espaço necessário */
+/* Clickable Row */
+.clickable {
+  cursor: pointer;
+}
+.clickable:hover {
+  background-color: rgba(255, 255, 255, 0.15); /* Stronger hover */
 }
 
-.statistics-section-atc .atc-status {
-  display: flex;
-  gap: 5px; /* Espaçamento entre os rótulos ATC */
-  justify-content: flex-end; /* Alinha os rótulos ATC à direita */
-  flex: 1; /* Permite que os rótulos ocupem o espaço necessário */
+.badge {
+  padding: 4px 8px; /* Restored padding */
+  border-radius: 6px;
+  font-size: 10px; /* Slightly larger text */
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+  min-width: 35px; /* Min width for consistency */
+  display: inline-block;
 }
+
+.badge-grd { background-color: #7f1d1d; color: #fecaca; } 
+.badge-twr { background-color: #b91c1c; color: #fff; }    
+.badge-app { background-color: #1e3a8a; color: #bfdbfe; } 
+.badge-dep { background-color: #1e40af; color: #fff; }    
+.badge-ctr { background-color: #0c4a6e; color: #bae6fd; } 
+.badge-atis{ background-color: #374151; color: #9ca3af; }

@@ -96,6 +96,20 @@ export const SidebarMenu = () => {
     };
   }, []);
 
+  // Ref for Map Actions
+  const mapActions = useRef(null);
+
+  const handleMapReady = (actions) => {
+    mapActions.current = actions;
+  };
+
+  const handleAirportSelect = (lat, lon) => {
+    if (mapActions.current && mapActions.current.flyTo) {
+      mapActions.current.flyTo(lat, lon, 12);
+      // Optional: Close sidebar on mobile? Keep open for now.
+    }
+  };
+
   return (
     <Layout>
       {/* Sidebar with logo and menu list */}
@@ -113,6 +127,7 @@ export const SidebarMenu = () => {
             <SessionInfoSidebar
               sessionName={sessions[selectedServer].name}
               sessionId={sessions[selectedServer].id}
+              onAirportSelect={handleAirportSelect}
             />
           )}
           
@@ -123,6 +138,7 @@ export const SidebarMenu = () => {
             sessionName={sessions[selectedServer].name}
             onIconClick={handleMapIconClick} 
             onAtcClick={handleAtcClick}
+            onMapReady={handleMapReady}
           />
           
           {/* User Info Sidebar */}

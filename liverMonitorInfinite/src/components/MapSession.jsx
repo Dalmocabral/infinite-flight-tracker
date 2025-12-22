@@ -13,7 +13,7 @@ import ZuluClock from './ZuluClock';
 // but we might need to pass savedUsername/savedVAName if we want to keep the component pure.
 // Currently useAircraftMarkers takes them as args.
 
-const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick }) => {
+const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick, onMapReady }) => {
   const mapContainer = useRef(null);
   const [selectedFlightId, setSelectedFlightId] = useState(null);
   
@@ -80,6 +80,15 @@ const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick }) => {
   useEffect(() => {
       if (!isMapLoaded || !map.current) return;
       
+      // Expose Map Actions to Parent
+      if (onMapReady) {
+          onMapReady({
+              flyTo: (lat, lon, zoom = 12) => {
+                  map.current.flyTo({ center: [lon, lat], zoom: zoom });
+              }
+          });
+      }
+
       const onMapClick = (e) => {
           if (e.defaultPrevented) return;
           removePolylines();
@@ -92,7 +101,7 @@ const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick }) => {
                map.current.off('click', onMapClick);
           }
       };
-  }, [isMapLoaded, map, removePolylines]);
+  }, [isMapLoaded, map, removePolylines, onMapReady]);
 
 
   return (

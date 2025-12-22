@@ -9,7 +9,7 @@ import { useAtc } from '../hooks/useAtc';
 import { useFlights } from '../hooks/useFlights';
 import SidebarSkeleton from './SidebarSkeleton';
 
-const SessionInfoSidebar = ({ sessionName, sessionId }) => {
+const SessionInfoSidebar = ({ sessionName, sessionId, onAirportSelect }) => {
   // Estado para armazenar o número de usuários online
   const [userCount, setUserCount] = useState(null);
   
@@ -92,7 +92,10 @@ const SessionInfoSidebar = ({ sessionName, sessionId }) => {
     const { airportName, type } = atc;
     const typeLabel = getTypeLabel(type);
     if (!acc[airportName]) {
-      acc[airportName] = { grd: false, twr: false, app: false, dep: false, ctr: false, atis: false };
+      acc[airportName] = { 
+          grd: false, twr: false, app: false, dep: false, ctr: false, atis: false,
+          lat: atc.latitude, lon: atc.longitude // Store Coords
+      };
     }
     if (typeLabel) {
       acc[airportName][typeLabel] = true;
@@ -180,13 +183,27 @@ const SessionInfoSidebar = ({ sessionName, sessionId }) => {
         <h4>Status de ATC</h4>
         <ul>
           {Object.keys(atcGroupedByAirport).map((airport) => (
-            <li key={airport} className="airport-stat">
+            // Pass onAirportSelect prop to component
+            <li 
+              key={airport} 
+              className="airport-stat clickable" 
+              onClick={() => {
+                   // Find coordinates from the grouped data logic or pass raw data differently?
+                   // Logic below adds click handler.
+                   const group = atcGroupedByAirport[airport];
+                   if (onAirportSelect && group.lat && group.lon) {
+                       onAirportSelect(group.lat, group.lon);
+                   }
+              }}
+            >
               <span className="airport">{airport}</span>
               <span className="atc-status">
-                {atcGroupedByAirport[airport].grd && <span>Grd</span>}
-                {atcGroupedByAirport[airport].twr && <span>Twr</span>}
-                {atcGroupedByAirport[airport].app && <span>App</span>}
-                {atcGroupedByAirport[airport].dep && <span>Dep</span>}
+                {atcGroupedByAirport[airport].grd && <span className="badge badge-grd">Grd</span>}
+                {atcGroupedByAirport[airport].twr && <span className="badge badge-twr">Twr</span>}
+                {atcGroupedByAirport[airport].app && <span className="badge badge-app">App</span>}
+                {atcGroupedByAirport[airport].dep && <span className="badge badge-dep">Dep</span>}
+                {atcGroupedByAirport[airport].ctr && <span className="badge badge-ctr">Ctr</span>}
+                {atcGroupedByAirport[airport].atis && <span className="badge badge-atis">Atis</span>}
               </span>
             </li>
           ))}
