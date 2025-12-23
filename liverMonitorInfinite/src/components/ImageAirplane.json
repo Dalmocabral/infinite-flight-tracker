@@ -484,8 +484,57 @@
         "LiveryName": "Generic",
         "modelo": "Boeing 787-8",        
         "image": "https://i.ibb.co/vdYWM6P/Generic.png"
-    }
+    },
+    {
+        "id": "ec160f7e-1b3e-4f5f-b471-09e6fd01be35",
+        "LiveryName": "Generic",
+        "modelo": "CRJ-200",        
+        "image": "https://i.ibb.co/xS3Rhr44/CRJ-200-generic.png"
+    },
+    {
+        "id": "99abff48-214c-4c99-8b48-ef6108d2dd4f",
+        "LiveryName": "China Eastern Airlines",
+        "modelo": "Boeing 777-300ER",        
+        "image": "https://i.ibb.co/KpTTsKCz/Boeing-777-300-ER-China-Eastern-Airlines.png"
+    },
+    {
+        "id": "d425409e-7f32-40f6-98e1-4aa57ecca450",
+        "LiveryName": "FedEx",
+        "modelo": "Boeing 777F",        
+        "image": "https://i.ibb.co/QvfVtnfv/Boeing-777-F-Fed-Ex.png"
+    },
+    {
+        "id": "f4c8c41b-0e39-4c56-a984-c630f99a2a96",
+        "LiveryName": "Air Europa",
+        "modelo": "Boeing 787-9",        
+        "image": "https://i.ibb.co/GQNtNXB7/Boeing-787-9-Air-Europa.png"
+    },
+    {
+        "id": "99cb6665-fc96-4b91-8570-052747c7676e",
+        "LiveryName": "Varig",
+        "modelo": "Boeing 777-200ER",        
+        "image": "https://i.ibb.co/KcjjFK9D/Boeing-777-200-ER-varig.png"
+    },
+    {
+        "id": "6d73388a-a8cf-4245-8a7e-fe08a5fb056c",
+        "LiveryName": "Boeing 737-8 MAX",
+        "modelo": "Copa Airlines",        
+        "image": "https://i.ibb.co/nq9XgHz0/Boeing-737-8-MAX-Copa-Airlines.png"
+    },
+    {
+        "id": "78860e9f-6031-4eed-8936-df7d9afb238e",
+        "LiveryName": "Boeing 777F",
+        "modelo": "DHL",        
+        "image": "https://i.ibb.co/4gMhMgfC/Boeing-777-F-dhl.png"
 
+    },
+    {
+        "id": "38fd7fe0-9ec3-4fda-94e8-f1d94cf2d01d",
+        "LiveryName": "Boeing 777-300ER",
+        "modelo": "Air India",        
+        "image": "https://i.ibb.co/vvkgVhp2/Boeing-777-300-ER-Air-India.png"
+
+    }   
     
     
     
