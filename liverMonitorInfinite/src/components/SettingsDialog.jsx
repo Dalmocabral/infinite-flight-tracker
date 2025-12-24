@@ -48,8 +48,11 @@ const SettingsDialog = ({ open, onClose, flightsData }) => {
   }, [flightsData]);
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, checked, type } = event.target;
+    setFormData((prev) => ({ 
+        ...prev, 
+        [name]: type === 'checkbox' ? checked : value 
+    }));
   };
 
   const handleSubmit = () => {

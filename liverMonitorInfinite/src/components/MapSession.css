@@ -82,3 +82,17 @@ html, body {
     width: 20px;
     height: 20px;
   }
+
+  .santa-marker-icon {
+      width: 100px; /* Bigger than planes */
+      height: 100px;
+      /* Use Sleigh/Staff image as base */
+      background-image: url('../assets/papainoel.png'); 
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      /* Ensure rotation works around center */
+      transform-origin: center center;
+      z-index: 1000; /* On top of planes */
+      cursor: pointer;
+  }

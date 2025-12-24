@@ -4,6 +4,7 @@ import { useAircraftMarkers } from '../hooks/map/useAircraftMarkers';
 import { useAtcLayer } from '../hooks/map/useAtcLayer';
 import { useFlightPlan } from '../hooks/map/useFlightPlan';
 import { useMap } from '../hooks/map/useMap';
+import { useSantaMarker } from '../hooks/map/useSantaMarker';
 import { useTrajectory } from '../hooks/map/useTrajectory';
 import "./MapSession.css";
 import ZuluClock from './ZuluClock';
@@ -57,7 +58,11 @@ const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick, onMapRead
   // 6. ATC Layer Hook
   useAtcLayer(map, atcData, sessionName, isMapLoaded, onAtcClick);
 
-  // 6. Global Map Click Logic for Clearing Selection
+  // 7. Santa Tracker Hook 🎅
+  const ENABLE_SANTA = false; // Hardcoded Enable
+  useSantaMarker(map, ENABLE_SANTA, onIconClick);
+
+  // 8. Global Map Click Logic for Clearing Selection
   // Note: logic moved to inside useAircraftMarkers ? No, useAircraftMarkers handles marker clicks.
   // We need the background click logic. 
   // We can add it here or in useMap. 
