@@ -1,15 +1,12 @@
 import {
-    Button,
-    Chip,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
-    TextField
+  Autocomplete,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 
@@ -79,33 +76,43 @@ const SettingsDialog = ({ open, onClose, flightsData }) => {
           margin="normal"
         />
 
-        {/* Dynamic VA Select */}
-        <FormControl fullWidth margin="normal">
-          <InputLabel id="va-vo-select-label">Select VA/VO (Online Count)</InputLabel>
-          <Select
-            labelId="va-vo-select-label"
-            name="vaVo"
-            value={formData.vaVo}
-            onChange={handleChange}
-            label="Select VA/VO (Online Count)"
-            MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }} // Limit height
-          >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            {vaOptions.map((va) => (
-              <MenuItem key={va.name} value={va.name} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>{va.name}</span>
-                <Chip label={va.count} size="small" color="primary" variant="outlined" style={{ height: '20px' }} />
-              </MenuItem>
-            ))}
-            
-            {/* Fallback if list is empty or specific VA not online? 
-                Maybe allow custom input or just show "Others..."? 
-                For now, only showing currently online VAs as requested. 
-            */}
-          </Select>
-        </FormControl>
+        {/* Dynamic VA Autocomplete */}
+        <Autocomplete
+            freeSolo
+            options={vaOptions}
+            getOptionLabel={(option) => {
+                if (typeof option === 'string') return option;
+                return option.name;
+            }}
+            value={
+                // Tenta encontrar o objeto correspondente ou usa a string direta
+                vaOptions.find(v => v.name === formData.vaVo) || formData.vaVo
+            }
+            onChange={(event, newValue) => {
+                const value = (typeof newValue === 'string') ? newValue : (newValue?.name || "");
+                setFormData(prev => ({ ...prev, vaVo: value }));
+            }}
+            onInputChange={(event, newInputValue) => {
+                 // Sincroniza também ao digitar (freeSolo)
+                 // Nota: onChange lida com seleção e 'enter', onInputChange lida com digitação direta se não selecionar
+                 setFormData(prev => ({ ...prev, vaVo: newInputValue }));
+            }}
+            renderOption={(props, option) => (
+                <li {...props} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{option.name}</span>
+                    <Chip label={option.count} size="small" color="primary" variant="outlined" style={{ height: '20px' }} />
+                </li>
+            )}
+            renderInput={(params) => (
+                <TextField 
+                    {...params} 
+                    label="Select or Type VA/VO" 
+                    margin="normal"
+                    helperText="Select from list or type your own"
+                />
+            )}
+        />
+        {/* Removed FormControl/Select wrapper */}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="error">Cancel</Button>
