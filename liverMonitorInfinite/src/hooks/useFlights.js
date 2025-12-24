@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import ApiService from '../components/ApiService';
 
-export const useFlights = (sessionId) => {
+export const useFlights = (sessionId, enabled = true) => {
   return useQuery({
     queryKey: ['flights', sessionId],
     queryFn: async () => {
@@ -10,7 +10,7 @@ export const useFlights = (sessionId) => {
         // Here we assume ApiService already returns the desired array
         return flights;
     },
-    enabled: !!sessionId,
+    enabled: !!sessionId && enabled,
     refetchInterval: 30000, // 30 seconds polling as per original code
     staleTime: 20000, 
   });

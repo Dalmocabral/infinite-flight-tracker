@@ -53,7 +53,7 @@ const SessionInfoSidebar = ({ sessionName, sessionId, onAirportSelect }) => {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5);
 
-    setAircraftData([["Aeronave", "Quantidade"], ...aircraftArray]);
+    setAircraftData([["Aircraft", "Count"], ...aircraftArray]);
 
   }, [flightData]);
 
@@ -120,17 +120,17 @@ const SessionInfoSidebar = ({ sessionName, sessionId, onAirportSelect }) => {
       <div className="session-count-user">
         {userCount !== null ? (
           <p>
-            <span>{userCount}</span> Usuários Online
+            <span>{userCount}</span> Users Online
           </p>
         ) : (
-          <p>Carregando...</p>
+          <p>Loading...</p>
         )}
       </div>
 
       {/* Gráfico de aeronaves / Aircraft chart */}
       <div className="chart-section">
         <div className="grafic-header">
-          <h4>5 Aeronaves Populares</h4>
+          <h4>5 Popular Aircraft</h4>
         </div>
         <div className="chart-container">
           {aircraftData.length > 1 ? (
@@ -155,18 +155,18 @@ const SessionInfoSidebar = ({ sessionName, sessionId, onAirportSelect }) => {
               height="200px"
             />
           ) : (
-            <p>Carregando gráfico...</p>
+            <p>Loading chart...</p>
           )}
         </div>
       </div>
 
       {/* Tabela de aeroportos / Airports table */}
       <div className="statistics-section">
-        <h4>Aeroportos Populares</h4>
+        <h4>Popular Airports</h4>
         <div className="airport-table">
           <div className="airport-table-header">
-            <span className="labelInbound">Entrada</span>
-            <span className="labelOutbound">Saída</span>
+            <span className="labelInbound">Inbound</span>
+            <span className="labelOutbound">Outbound</span>
           </div>
           {airports.map((airport) => (
             <div key={airport.airportIcao} className="airport-stat">
@@ -180,7 +180,7 @@ const SessionInfoSidebar = ({ sessionName, sessionId, onAirportSelect }) => {
 
       {/* Status de ATC / ATC status */}
       <div className="statistics-section-atc">
-        <h4>Status de ATC</h4>
+        <h4>ATC Status</h4>
         <ul>
           {Object.keys(atcGroupedByAirport).map((airport) => (
             // Pass onAirportSelect prop to component

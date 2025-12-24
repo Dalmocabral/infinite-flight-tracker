@@ -15,6 +15,16 @@ const ApiService = {
     }
   },
 
+  getSessions: async () => {
+      try {
+          const response = await axios.get(`${BASE_URL}/sessions?apikey=${API_KEY}`);
+          return response.data.result;
+      } catch (error) {
+           console.error("Error fetching sessions list:", error);
+           throw error;
+      }
+  },
+
   getFlightData: async (sessionId) => {
     try {
       const response = await axios.get(`${BASE_URL}/sessions/${sessionId}/flights?apikey=${API_KEY}`);

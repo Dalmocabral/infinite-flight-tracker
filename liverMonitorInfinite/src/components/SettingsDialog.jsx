@@ -68,7 +68,7 @@ const SettingsDialog = ({ open, onClose, flightsData }) => {
       <DialogContent>
         {/* Username Field */}
         <TextField
-          label="Username IFC"
+          label="IFC Username"
           name="formUsername"
           value={formData.formUsername}
           onChange={handleChange}
