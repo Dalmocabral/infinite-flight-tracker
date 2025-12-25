@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useState } from "react";
 import ApiService from "./ApiService";
 import "./AtcInfoSidebar.css";
+import WeatherWidget from "./WeatherWidget";
 
 const AtcInfoSidebar = forwardRef(({ atc, sessionId, onClose }, ref) => {
   const [atisInfo, setAtisInfo] = useState(null);
@@ -81,6 +82,9 @@ const AtcInfoSidebar = forwardRef(({ atc, sessionId, onClose }, ref) => {
       </div>
 
       <div className="atc-info-content">
+          {/* Detailed Metar Widget */}
+          <WeatherWidget icao={atc.airportName} />
+
           <div className="atc-info-section">
             <span className="section-title">ATIS</span>
             <p className="atis-text">{atisInfo ? atisInfo : "No ATIS information available."}</p>

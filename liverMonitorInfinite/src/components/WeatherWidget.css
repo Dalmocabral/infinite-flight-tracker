@@ -1,0 +1,64 @@
+
+.weather-widget {
+    background: rgba(15, 23, 42, 0.6); /* Slate/Dark Blue Glass */
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif; /* Assuming Inter or similar sans */
+}
+
+.weather-widget.loading, .weather-widget.error {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    padding: 16px;
+}
+
+.weather-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.weather-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.weather-icon {
+    font-size: 1.1rem !important; /* Material Icons override */
+}
+
+.wind-icon { color: #6ece99; /* Greenish/Teal match */ }
+.temp-icon { color: #38bdf8; /* Light Blue match */ }
+.vis-icon { color: #94a3b8; /* Grayish */ }
+.qnh-icon { color: #94a3b8; /* Grayish */ }
+
+.weather-value {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #f1f5f9;
+}
+
+.weather-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-right: 4px;
+}
+
+.unit {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 500;
+    margin: 0 2px;
+}
