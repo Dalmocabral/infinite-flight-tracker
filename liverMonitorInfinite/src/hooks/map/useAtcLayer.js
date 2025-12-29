@@ -32,13 +32,19 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
     useEffect(() => {
         if (!isMapLoaded || !map.current) return;
 
-        // Initialize Source and Layers if missing
+        // 1. Initialize Source if missing
         if (!map.current.getSource('atc-boundaries')) {
             map.current.addSource('atc-boundaries', {
                 type: 'geojson',
                 data: { type: 'FeatureCollection', features: [] }
             });
+        }
 
+        // 2. Initialize or Update Layers
+        // We separate this check to handle Hot Reloading or subsequent re-runs where source exists but new layers map not
+        
+        // Layer: ATC Fill
+        if (!map.current.getLayer('atc-fill')) {
             map.current.addLayer({
                 id: 'atc-fill',
                 type: 'fill',
@@ -46,19 +52,58 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
                 paint: {
                     'fill-color': ['get', 'color'],
                     'fill-opacity': 0.15
-                }
+                },
+                filter: ['!=', ['get', 'type'], 'STAR']
             });
+        } else {
+             // Ensure filter is up to date (hot fix)
+             map.current.setFilter('atc-fill', ['!=', ['get', 'type'], 'STAR']);
+        }
 
-            map.current.addLayer({
+        // Layer: ATC Outline
+        if (!map.current.getLayer('atc-outline')) {
+             map.current.addLayer({
                 id: 'atc-outline',
                 type: 'line',
                 source: 'atc-boundaries',
                 paint: {
                     'line-color': ['get', 'color'],
                     'line-width': 1
+                },
+                filter: ['!=', ['get', 'type'], 'STAR']
+            });
+        } else {
+             map.current.setFilter('atc-outline', ['!=', ['get', 'type'], 'STAR']);
+        }
+
+        // Layer: STAR Fill
+        if (!map.current.getLayer('atc-star-fill')) {
+            map.current.addLayer({
+                id: 'atc-star-fill',
+                type: 'fill',
+                source: 'atc-boundaries',
+                filter: ['==', ['get', 'type'], 'STAR'],
+                paint: {
+                    'fill-color': '#FFEE58', // Lighter Yellow
+                    'fill-opacity': 0.6
                 }
             });
         }
+
+        // Layer: STAR Outline
+        if (!map.current.getLayer('atc-star-outline')) {
+            map.current.addLayer({
+                id: 'atc-star-outline',
+                type: 'line',
+                source: 'atc-boundaries',
+                filter: ['==', ['get', 'type'], 'STAR'],
+                paint: {
+                    'line-color': '#000000', // Black outline
+                    'line-width': 1.5
+                }
+            });
+        }
+
 
         const fetchOpenAIP = async (atc) => {
             const apiKey = import.meta.env.VITE_OPENAIP_KEY;
@@ -95,8 +140,7 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
                          bestMatch = items.find(i => hasKeyword(i.name, ['TMA', 'CTA', 'TRACON', 'CLASS B', 'CLASS C', 'APPROACH', 'DEPARTURE']));
                     }
 
-                    // Fallback: If we have multiple polygons, pick the largest one (likely the main airspace)
-                    // (Simple heuristic: geometry size logic roughly via array length or just first regular polygon)
+                    // Fallback: If we have multiple polygons, pick the largest one
                     if (!bestMatch) {
                         bestMatch = items.find(i => i.geometry.type === 'Polygon' || i.geometry.type === 'MultiPolygon');
                     }
@@ -137,9 +181,17 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
               const activeAtc = atcData.filter(atc => [0, 1, 4, 5, 6].includes(atc.type));
               let allFeatures = [];
               const unmatchedAtc = [];
+
+              // Detect Fully Staffed Airports (Ground + Tower)
+              const airportStaffing = new Map(); // ICAO -> Set(Types)
+              activeAtc.forEach(atc => {
+                  if (!airportStaffing.has(atc.airportName)) {
+                      airportStaffing.set(atc.airportName, new Set());
+                  }
+                  airportStaffing.get(atc.airportName).add(atc.type);
+              });
               
-              // Z-Index Priority (Higher value = Drawn Later = On Top)
-              // 0 (Gnd) > 1 (Twr) > 4/5 (App/Dep) > 6 (Ctr)
+              // Z-Index Priority
               const typePriority = {
                   0: 4, // Top
                   1: 3,
@@ -189,7 +241,7 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
                   // SPECFIC LOGIC: Ground (0) and Tower (1) ALWAYS use generated circles (Red)
                   if (atc.type === 0 || atc.type === 1) {
                       if (atc.latitude && atc.longitude) {
-                          // Dynamic Sizing: Check if this airport also has APP (4) or DEP (5) active
+                          // Dynamic Sizing
                           const hasUpperLayer = activeAtc.some(a => 
                               a.airportName === atc.airportName && (a.type === 4 || a.type === 5)
                           );
@@ -197,8 +249,6 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
                           // Base Radius
                           let radius = (atc.type === 1) ? 18520 : 5556; // Twr: ~10nm, Gnd: ~3nm
                           
-                          // If parent layer exists, reduce radius to ensure it fits visually inside
-                          // Reducing to 40% of original size ensures clear nesting
                           if (hasUpperLayer) {
                                radius = radius * 0.4; 
                           }
@@ -234,7 +284,6 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
                       // Check Cache FIRST
                       if (openAipCache.current.has(atc.airportName)) {
                           const cached = openAipCache.current.get(atc.airportName);
-                          // Ensure cached feature also has atcType for sorting
                           feature = {
                               ...cached,
                               properties: { ...cached.properties, atcType: atc.type }
@@ -280,11 +329,65 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
                   if (feature) allFeatures.push(feature);
               });
               
-              // 3. Sort Features for Z-Index
+              // 3. GENERATE STARS (Gnd + Twr)
+              airportStaffing.forEach((types, icao) => {
+                  if (types.has(0) && types.has(1)) { // Has Ground AND Tower
+                       // Find coordinates from the Tower entry (usually more reliable or same)
+                       const refAtc = activeAtc.find(a => a.airportName === icao && a.type === 1);
+                       
+                       if (refAtc && refAtc.latitude && refAtc.longitude) {
+                           // SCALE FIX: Check if there is an Upper Layer (APP/DEP)
+                           const hasUpperLayer = activeAtc.some(a => 
+                               a.airportName === icao && (a.type === 4 || a.type === 5)
+                           );
+
+                           let radiusMeters = 18520; // 10nm
+                           if (hasUpperLayer) {
+                               radiusMeters = radiusMeters * 0.4; // Scale down if nested like the circle
+                           }
+
+                           const km = radiusMeters / 1000;
+                           const innerFactor = 0.2; // 20% inner radius for star spikes
+
+                           const distanceX = km / (111.32 * Math.cos((refAtc.latitude * Math.PI) / 180));
+                           const distanceY = km / 110.574;
+                           
+                           const starCoords = [];
+                           const points = 4;
+                           
+                           for (let i = 0; i < points * 2; i++) {
+                               const isOuter = i % 2 === 0;
+                               const r = isOuter ? 1.0 : innerFactor;
+                               
+                               const theta = (i * Math.PI) / points; 
+                               
+                               const x = (distanceX * r) * Math.cos(theta);
+                               const y = (distanceY * r) * Math.sin(theta);
+                               
+                               starCoords.push([refAtc.longitude + x, refAtc.latitude + y]);
+                           }
+                           starCoords.push(starCoords[0]); // Close
+
+                           allFeatures.push({
+                               type: 'Feature',
+                               geometry: { type: 'Polygon', coordinates: [starCoords] },
+                               properties: {
+                                   id: icao,
+                                   type: 'STAR',
+                                   atcType: 999,
+                                   color: '#FFEE58' // Fallback color
+                               }
+                           });
+                       }
+                  }
+              });
+
+              // 4. Sort Features for Z-Index
               allFeatures.sort((a, b) => {
-                   const pA = typePriority[a.properties.atcType] || 0;
-                   const pB = typePriority[b.properties.atcType] || 0;
-                   return pA - pB; // Ascending: 1 (Bottom) to 4 (Top)
+                   // STARs (999) should be on TOP
+                   const pA = a.properties.atcType === 999 ? 999 : (typePriority[a.properties.atcType] || 0);
+                   const pB = b.properties.atcType === 999 ? 999 : (typePriority[b.properties.atcType] || 0);
+                   return pA - pB; 
               });
       
               const dataToRender = {
@@ -303,31 +406,34 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
         updateAtcLayer();
     }, [atcData, boundariesGeoJson, sessionName, isMapLoaded, map]);
 
-   // (Keep Click Listener logic same as before...)
     // Setup Click Listener
     useEffect(() => {
         if (!isMapLoaded || !map.current) return;
         const onMapClick = (e) => {
             if (e.features && e.features.length > 0) {
-                // Get the TOP feature (because we sorted them by Z-Index, this is the one we want)
                 const feature = e.features[0];
                 const atcId = feature.properties.id; 
-                const clickType = feature.properties.atcType; // Identify the specific layer clicked
+                let clickType = feature.properties.atcType; 
+
+                // If Star clicked, treat as Tower (type 1) or decide logic
+                // Usually we want to open Tower frequency
+                if (feature.properties.type === 'STAR') {
+                    clickType = 1; 
+                }
 
                 if (onAtcClick && atcDataRef.current) {
-                    // Precise Find: Match BOTH id (airport) AND type
+                    
                     let clickedAtc = atcDataRef.current.find(a => 
                         a.airportName === atcId && a.type === clickType
                     );
                     
-                    // Fallback: If for some reason type match fails (shouldn't if data consistent), try generic ID
                     if (!clickedAtc) {
+                         // Fallback generally to any active frequency for that airport
                          clickedAtc = atcDataRef.current.find(a => a.airportName === atcId);
                     }
 
                     if (clickedAtc) {
                         onAtcClick(clickedAtc);
-                        // Prevent document click listener (handleClickOutside) from firing and messing up state
                         if (e.originalEvent) {
                             e.originalEvent.stopPropagation();
                         }
@@ -337,14 +443,27 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
         };
         const onMouseEnter = () => map.current.getCanvas().style.cursor = 'pointer';
         const onMouseLeave = () => map.current.getCanvas().style.cursor = '';
+        
+        // Listen Open layers
         map.current.on('click', 'atc-fill', onMapClick);
+        map.current.on('click', 'atc-star-fill', onMapClick); // Listen to Star too
+
         map.current.on('mouseenter', 'atc-fill', onMouseEnter);
+        map.current.on('mouseenter', 'atc-star-fill', onMouseEnter);
+
         map.current.on('mouseleave', 'atc-fill', onMouseLeave);
+        map.current.on('mouseleave', 'atc-star-fill', onMouseLeave);
+
         return () => {
             if (map.current) {
                 map.current.off('click', 'atc-fill', onMapClick);
+                map.current.off('click', 'atc-star-fill', onMapClick);
+
                 map.current.off('mouseenter', 'atc-fill', onMouseEnter);
+                map.current.off('mouseenter', 'atc-star-fill', onMouseEnter);
+
                 map.current.off('mouseleave', 'atc-fill', onMouseLeave);
+                map.current.off('mouseleave', 'atc-star-fill', onMouseLeave);
             }
         };
     }, [isMapLoaded, map, onAtcClick]);
