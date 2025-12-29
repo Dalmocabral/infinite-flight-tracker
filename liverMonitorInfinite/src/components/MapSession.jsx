@@ -4,8 +4,10 @@ import { useAircraftMarkers } from '../hooks/map/useAircraftMarkers';
 import { useAtcLayer } from '../hooks/map/useAtcLayer';
 import { useFlightPlan } from '../hooks/map/useFlightPlan';
 import { useMap } from '../hooks/map/useMap';
+import { useNotamLayer } from '../hooks/map/useNotamLayer'; // New Hook
 import { useSantaMarker } from '../hooks/map/useSantaMarker';
 import { useTrajectory } from '../hooks/map/useTrajectory';
+import { useNotams } from '../hooks/useNotams'; // New Hook
 import "./MapSession.css";
 import ZuluClock from './ZuluClock';
 
@@ -24,6 +26,9 @@ const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick, onMapRead
   // Use Props directly
   const flightsData = flightsDataProp;
   const atcData = atcDataProp;
+  
+  // 1.5 Fetch NOTAMS
+  const { data: notams } = useNotams(sessionId);
 
   // 2. Map Initialization Hook
   const { map, isMapLoaded } = useMap(mapContainer);
@@ -57,6 +62,9 @@ const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick, onMapRead
 
   // 6. ATC Layer Hook
   useAtcLayer(map, atcData, sessionName, isMapLoaded, onAtcClick);
+
+  // 6.5 NOTAM Layer Hook
+  useNotamLayer(map, notams, atcData, isMapLoaded, onAtcClick);
 
   // 7. Santa Tracker Hook 🎅
   const ENABLE_SANTA = false; // Hardcoded Enable

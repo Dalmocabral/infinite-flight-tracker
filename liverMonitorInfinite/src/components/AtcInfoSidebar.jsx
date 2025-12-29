@@ -73,8 +73,9 @@ const AtcInfoSidebar = forwardRef(({ atc, sessionId, onClose }, ref) => {
               "Aircraft",
               "Recorded",
               "Unknown",
+              "Unknown",
               "Unused",
-            ][atc.type] || "ATC"
+            ][atc.type] || (atc.type === 99 ? "Airport Info" : "ATC")
           }
         </h3>
         <h5>{atc.airportName}</h5>
