@@ -20,7 +20,7 @@ html, body {
 .airplane-icon {
     width: 32px;
     height: 32px;
-    background-image: url('../assets/airplane_user.png'); /* URL do ícone */
+    background-image: url('../assets/airplane.png'); /* URL do ícone */
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -77,10 +77,10 @@ html, body {
   }
 
   .custom-aircraft-icon {
-    background-image: url('../assets/airplane_ge.png'); /* Ícone para usuários staff */
+    background-image: url('../assets/06.png'); /* Ícone para usuários staff */
     background-size: cover;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
 
   .santa-marker-icon {
@@ -96,3 +96,48 @@ html, body {
       z-index: 1000; /* On top of planes */
       cursor: pointer;
   }
+
+  .large-aircraft-icon {
+    background-image: url('../assets/A225.png');
+    background-size: cover;
+    width: 32px; /* Slightly larger for widebodies */
+    height: 32px;
+  }
+
+  .fighter-aircraft-icon {
+    background-image: url('../assets/04.png');
+    background-size: contain;
+    width:24px; /* Slightly smaller/agile look */
+    height: 24px;
+  }
+
+  /* Staff Variants */
+  .staff-ge-icon {
+    background-image: url('../assets/staff_ge.png');
+    background-size: cover;
+    width: 20px;
+    height: 20px;
+  }
+
+  .staff-medium-icon {
+    background-image: url('../assets/staff_medio.png');
+    background-size: cover;
+    width: 30px;
+    height: 30px;
+  }
+
+  .staff-large-icon {
+    background-image: url('../assets/staff_grande.png');
+    background-size: cover;
+    width: 36px;
+    height: 36px;
+  }
+
+  .military-cargo-icon {
+    background-image: url('../assets/A400.png');
+    background-size: contain;
+    width: 30px; /* Distinct styling */
+    height: 30px;
+  }
+
+

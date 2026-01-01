@@ -131,6 +131,26 @@ const ApiService = {
       throw error;
     }
   },
+
+  getAirportInfo: async (airportIcao) => {
+      try {
+          const response = await axios.get(`${BASE_URL}/airports/${airportIcao}?apikey=${API_KEY}`);
+          return response.data.result;
+      } catch (error) {
+          console.error(`Error fetching info for ${airportIcao}:`, error);
+          throw error;
+      }
+  },
+
+  getAircraftDefinitions: async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/aircraft?apikey=${API_KEY}`);
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching aircraft definitions:", error);
+      throw error;
+    }
+  },
 };
 
 export default ApiService;

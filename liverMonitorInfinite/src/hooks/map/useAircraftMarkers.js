@@ -1,6 +1,5 @@
 import maplibregl from "maplibre-gl";
 import { useEffect, useRef } from 'react';
-import dataSetIconAircraft from '../../components/dataSetIconAircraft.json';
 import staffData from '../../components/staff.json';
 import stremerData from '../../components/Stremer.json';
 
@@ -8,10 +7,15 @@ import stremerData from '../../components/Stremer.json';
 // Ideally passed or defined here if not used elsewhere.
 // But mapSession uses them. Better to keep imports here.
 
+import { useAircraftDefinitions } from '../useAircraftDefinitions'; // Import Hook
+
 export const useAircraftMarkers = (map, flightsData, onIconClick, savedUsername, savedVAName, removePolylines, setSelectedFlightId, updateTrajectory, onMarkerUpdate) => {
     const markers = useRef({});
     const flightsRef = useRef(new Map()); // Map<flightId, { startLng, startLat, endLng, endLat, startTime, duration, heading }>
     const animationFrameRef = useRef();
+
+    // Fetch Aircraft Definitions
+    const { data: aircraftDefinitions } = useAircraftDefinitions();
 
     // 1. Manage Markers and Flight Data Sync
     useEffect(() => {
@@ -64,11 +68,19 @@ export const useAircraftMarkers = (map, flightsData, onIconClick, savedUsername,
                 const el = document.createElement('div');
                 const streamer = stremerData.find(st => st.username === username);
                 const isStaff = staffData.some(staff => staff.username === username);
-                const aircraft = dataSetIconAircraft.GA.find(ac => ac.id === aircraftId);
-    
+                
+                // Determine Category
+                const category = aircraftDefinitions ? aircraftDefinitions[aircraftId] : 'Medium'; // Default to Medium
+
                 el.className = 'airplane-icon smooth-marker'; 
+
+                // Prioridade de Ícones
                 if (!username || username === null) {
-                  el.className += ' airplane-icon';
+                  // User desconhecido? Usa lógica de avião
+                  if (category === 'Large') el.className += ' large-aircraft-icon';
+                  else if (category === 'Fighter') el.className += ' fighter-aircraft-icon';
+                  else if (category === 'GE') el.className += ' custom-aircraft-icon';
+                  else el.className += ' airplane-icon'; // Default Medium
                 } else if (username === savedUsername) {
                   el.className += ' special-airplane-icon';
                 } else if (virtualOrganization && virtualOrganization === savedVAName) {
@@ -76,11 +88,23 @@ export const useAircraftMarkers = (map, flightsData, onIconClick, savedUsername,
                 } else if (streamer && (streamer.twitch || streamer.youtube)) {
                   el.className += ' online-airplane-icon';
                 } else if (isStaff) {
-                  el.className += ' staff-airplane-icon';
-                } else if (aircraft) {   
-                  el.className += ' custom-aircraft-icon';
+                  // Staff Dynamic Icons based on Category
+                  if (category === 'Large' || category === 'MilitaryTransport') el.className += ' staff-large-icon';
+                  else if (category === 'GE') el.className += ' staff-ge-icon';
+                  else el.className += ' staff-medium-icon'; // Default for Medium & Fighter
                 } else {
-                  el.className += ' airplane-icon';
+                  // Usuário normal -> Lógica de tamanho de aeronave
+                  if (category === 'Large') {
+                      el.className += ' large-aircraft-icon';
+                  } else if (category === 'MilitaryTransport') {
+                      el.className += ' military-cargo-icon';
+                  } else if (category === 'Fighter') {
+                      el.className += ' fighter-aircraft-icon';
+                  } else if (category === 'GE') {
+                      el.className += ' custom-aircraft-icon'; // Maps to airplane_ge.png in CSS
+                  } else {
+                      el.className += ' airplane-icon'; // Default (Medium / User)
+                  }
                 }
 
                 // Interaction

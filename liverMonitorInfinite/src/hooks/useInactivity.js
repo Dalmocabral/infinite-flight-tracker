@@ -13,22 +13,18 @@ const useInactivity = (timeoutDuration = 120000) => { // Default 2 minutes
     }, [timeoutDuration]);
 
     useEffect(() => {
+        // If already inactive, do not set up listeners or timer
+        if (isInactive) return;
+
         const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
         
         const handleActivity = () => {
-            // Only reset if currently active (to prevent constant resets if already inactive? 
-            // No, standard is reset on activity. 
-            // EXCEPT: If we want to require manual reconnection, we should NOT reset on mousemove alone if ALREADY inactive.
-            // The user requested a dialog to appear. Usually that implies manual action to dismiss.
-            // If mousemove automatically reconnects, the dialog would flash disappear.
-            // So: If isInactive is true, DO NOT reset automatically. Wait for manual function call.
-            
-            if (!isInactive) { 
-                resetTimer(); // Debounce/Throttle could be added but simple reset is fine for now
-            }
+            // Because of the check at the start of useEffect, we know isInactive is false here
+            // (or rather, this closure was created when isInactive was false)
+            resetTimer(); 
         };
 
-        // Initialize timer
+        // Initialize timer (start counting down)
         resetTimer();
 
         // Attach listeners
@@ -42,7 +38,7 @@ const useInactivity = (timeoutDuration = 120000) => { // Default 2 minutes
 
     const handleReconnect = () => {
         setIsInactive(false);
-        resetTimer();
+        // resetTimer(); // Not needed, useEffect will run when isInactive becomes false and call resetTimer
     };
 
     return { isInactive, handleReconnect };
