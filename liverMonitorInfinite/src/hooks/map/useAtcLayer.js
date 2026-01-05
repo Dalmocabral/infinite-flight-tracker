@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 const GEOJSON_URL = 'https://raw.githubusercontent.com/vatsimnetwork/vatspy-data-project/refs/heads/master/Boundaries.geojson';
 const OPENAIP_URL = 'https://api.core.openaip.net/api/airspaces';
 
-export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick, smartUnicomAirports) => {
-    // console.warn("[AtcLayer] HOOK RENDER. UnicomAirports:", smartUnicomAirports?.length);
+export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) => {
     const [boundariesGeoJson, setBoundariesGeoJson] = useState(null);
     const atcDataRef = useRef(atcData); 
     const openAipCache = useRef(new Map()); // Cache for OpenAIP features: ICAO -> Feature
@@ -42,7 +41,6 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick, 
         }
 
         // 2. Initialize or Update Layers
-        // We separate this check to handle Hot Reloading or subsequent re-runs where source exists but new layers map not
         
         // Layer: ATC Fill
         if (!map.current.getLayer('atc-fill')) {
@@ -54,11 +52,10 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick, 
                     'fill-color': ['get', 'color'],
                     'fill-opacity': 0.15
                 },
-                filter: ['match', ['get', 'type'], ['STAR', 'UNICOM_SMART'], false, true] // Render everything EXCEPT STAR and UNICOM_SMART
+                filter: ['match', ['get', 'type'], ['STAR'], false, true] // Render everything EXCEPT STAR
             });
         } else {
-             // Ensure filter is up to date (hot fix)
-             map.current.setFilter('atc-fill', ['match', ['get', 'type'], ['STAR', 'UNICOM_SMART'], false, true]);
+             map.current.setFilter('atc-fill', ['match', ['get', 'type'], ['STAR'], false, true]);
         }
 
         // Layer: ATC Outline
@@ -71,39 +68,10 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick, 
                     'line-color': ['get', 'color'],
                     'line-width': 1
                 },
-                filter: ['match', ['get', 'type'], ['STAR', 'UNICOM_SMART'], false, true]
+                filter: ['match', ['get', 'type'], ['STAR'], false, true]
             });
         } else {
-             map.current.setFilter('atc-outline', ['match', ['get', 'type'], ['STAR', 'UNICOM_SMART'], false, true]);
-        }
-
-        // Layer: Smart Unicom Fill
-        if (!map.current.getLayer('unicom-smart-fill')) {
-            map.current.addLayer({
-                id: 'unicom-smart-fill',
-                type: 'fill',
-                source: 'atc-boundaries',
-                filter: ['==', ['get', 'type'], 'UNICOM_SMART'],
-                paint: {
-                    'fill-color': '#7986CB', // Indigo/Blue
-                    'fill-opacity': 0.15
-                }
-            });
-        }
-
-        // Layer: Smart Unicom Outline
-        if (!map.current.getLayer('unicom-smart-outline')) {
-            map.current.addLayer({
-                id: 'unicom-smart-outline',
-                type: 'line',
-                source: 'atc-boundaries',
-                filter: ['==', ['get', 'type'], 'UNICOM_SMART'],
-                paint: {
-                    'line-color': '#7986CB',
-                    'line-width': 1,
-                    'line-dasharray': [4, 2] // Dashed
-                }
-            });
+             map.current.setFilter('atc-outline', ['match', ['get', 'type'], ['STAR'], false, true]);
         }
 
         // Layer: STAR Fill
@@ -202,11 +170,9 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick, 
             
             // Debugging Layer State
             const hasSource = map.current?.getSource('atc-boundaries');
-            const hasLayer = map.current?.getLayer('unicom-smart-fill');
-            console.warn(`[AtcLayer] Update. Unicom: ${smartUnicomAirports?.length}, Source: ${!!hasSource}, Layer: ${!!hasLayer}`);
 
-            // Relaxed check: Allow render if we have ATC data OR Unicom data
-            if ((!isExpert && !smartUnicomAirports) || (!atcData && !smartUnicomAirports)) { 
+            // Relaxed check: Allow render if we have ATC data
+            if (!atcData && !isExpert) { 
                 if (hasSource) {
                      map.current.getSource('atc-boundaries').setData({ type: 'FeatureCollection', features: [] });
                 }
@@ -418,48 +384,12 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick, 
                   }
               });
 
-              // 4. SMART UNICOM LOGIC (Use coordinates from hook)
-              if (smartUnicomAirports && smartUnicomAirports.length > 0) {
-                   smartUnicomAirports.forEach(airport => {
-                       if (airport.latitude && airport.longitude) {
-                           // CREATE CIRCLE
-                           const radius = 18520; // 10nm (Standard Unicom/Tower/CTAF range)
-                           const km = radius / 1000;
-                           const ret = [];
-                           const distanceX = km / (111.32 * Math.cos((airport.latitude * Math.PI) / 180));
-                           const distanceY = km / 110.574;
-                           
-                           for (let i = 0; i < 64; i++) {
-                               const theta = (i / 64) * (2 * Math.PI);
-                               const x = distanceX * Math.cos(theta);
-                               const y = distanceY * Math.sin(theta);
-                               ret.push([airport.longitude + x, airport.latitude + y]);
-                           }
-                           ret.push(ret[0]);
-                           
-                           allFeatures.push({
-                               type: 'Feature',
-                               geometry: { type: 'Polygon', coordinates: [ret] },
-                               properties: {
-                                   id: airport.airportIcao,
-                                   type: 'UNICOM_SMART',
-                                   atcType: 99, // Custom type for sorting/handling
-                                   color: '#7986CB',
-                                   title: `Unicom: ${airport.airportIcao}` 
-                               }
-                           });
-                       }
-                   });
-              }
-
-
               // 5. Sort Features for Z-Index
               allFeatures.sort((a, b) => {
                    // STARs (999) should be on TOP
                    const typePrioritySort = (type) => {
                        if (type === 'STAR') return 999;
                        if (type === 999) return 999; // For STAR atcType
-                       if (type === 'UNICOM_SMART') return 2; // Similar to App/Dep
                        return typePriority[type] || 0;
                    };
 
@@ -467,9 +397,6 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick, 
                    const pB = typePrioritySort(b.properties.atcType || b.properties.type);
                    return pA - pB; 
               });
-
-              const unicomFeatures = allFeatures.filter(f => f.properties.type === 'UNICOM_SMART');
-              console.log(`[AtcLayer] Total Features: ${allFeatures.length} (Unicom: ${unicomFeatures.length})`);
       
               const dataToRender = {
                   type: 'FeatureCollection',
@@ -485,7 +412,7 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick, 
         };
 
         updateAtcLayer();
-    }, [atcData, boundariesGeoJson, sessionName, isMapLoaded, map, smartUnicomAirports]);
+    }, [atcData, boundariesGeoJson, sessionName, isMapLoaded, map]);
 
     // Setup Click Listener
     useEffect(() => {
@@ -495,27 +422,11 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick, 
                 const feature = e.features[0];
                 const atcId = feature.properties.id; 
                 let clickType = feature.properties.atcType; 
-
+                
                 // If Star clicked, treat as Tower (type 1) or decide logic
                 // Usually we want to open Tower frequency
                 if (feature.properties.type === 'STAR') {
                     clickType = 1; 
-                }
-                
-                // Smart Unicom Click
-                if (feature.properties.type === 'UNICOM_SMART') {
-                    // Create a Virtual ATC Object
-                    const virtualAtc = {
-                        airportName: atcId,
-                        type: 99, // Or generic "Info" type
-                        frequencyId: `unicom-${atcId}`,
-                        facilityName: `Unicom ${atcId}`
-                    };
-                    if (onAtcClick) {
-                        onAtcClick(virtualAtc);
-                        if (e.originalEvent) e.originalEvent.stopPropagation();
-                    }
-                    return; 
                 }
 
                 if (onAtcClick && atcDataRef.current) {
@@ -544,29 +455,23 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick, 
         // Listen Open layers
         map.current.on('click', 'atc-fill', onMapClick);
         map.current.on('click', 'atc-star-fill', onMapClick); 
-        map.current.on('click', 'unicom-smart-fill', onMapClick);
 
         map.current.on('mouseenter', 'atc-fill', onMouseEnter);
         map.current.on('mouseenter', 'atc-star-fill', onMouseEnter);
-        map.current.on('mouseenter', 'unicom-smart-fill', onMouseEnter);
 
         map.current.on('mouseleave', 'atc-fill', onMouseLeave);
         map.current.on('mouseleave', 'atc-star-fill', onMouseLeave);
-        map.current.on('mouseleave', 'unicom-smart-fill', onMouseLeave);
 
         return () => {
             if (map.current) {
                 map.current.off('click', 'atc-fill', onMapClick);
                 map.current.off('click', 'atc-star-fill', onMapClick);
-                map.current.off('click', 'unicom-smart-fill', onMapClick);
 
                 map.current.off('mouseenter', 'atc-fill', onMouseEnter);
                 map.current.off('mouseenter', 'atc-star-fill', onMouseEnter);
-                map.current.off('mouseenter', 'unicom-smart-fill', onMouseEnter);
 
                 map.current.off('mouseleave', 'atc-fill', onMouseLeave);
                 map.current.off('mouseleave', 'atc-star-fill', onMouseLeave);
-                map.current.off('mouseleave', 'unicom-smart-fill', onMouseLeave);
             }
         };
     }, [isMapLoaded, map, onAtcClick]);

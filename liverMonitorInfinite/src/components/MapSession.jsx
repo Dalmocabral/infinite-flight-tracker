@@ -8,8 +8,8 @@ import { useNotamLayer } from '../hooks/map/useNotamLayer'; // New Hook
 import { useSantaMarker } from '../hooks/map/useSantaMarker';
 import { useTrajectory } from '../hooks/map/useTrajectory';
 import { useNotams } from '../hooks/useNotams'; // New Hook
-import { useSmartUnicomData } from '../hooks/useSmartUnicomData'; // Robust Hook
 import "./MapSession.css";
+import SearchWidget from './SearchWidget'; // Feature: Search Widget
 import ZuluClock from './ZuluClock';
 
 // JSON imports are now handled inside the hooks where needed, 
@@ -31,8 +31,7 @@ const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick, onMapRead
   // 1.5 Fetch NOTAMS
   const { data: notams } = useNotams(sessionId);
 
-  // Smart Unicom Data Hook
-  const { smartUnicomAirports } = useSmartUnicomData(sessionId, atcData);
+
 
   // 2. Map Initialization Hook
   const { map, isMapLoaded } = useMap(mapContainer);
@@ -48,6 +47,9 @@ const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick, onMapRead
   // 4. Aircraft Markers & Animation Hook
   const savedUsername = localStorage.getItem('formUsername');
   const savedVAName = localStorage.getItem('vaName');
+  
+  // Custom Colors
+  const savedColors = JSON.parse(localStorage.getItem('userColors')) || {};
 
   useAircraftMarkers(
       map, 
@@ -55,10 +57,11 @@ const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick, onMapRead
       onIconClick, 
       savedUsername, 
       savedVAName, 
+      savedColors, // Pass colors object
       removePolylines, 
       setSelectedFlightId, 
       updateTrajectory,
-      updateTrajectoryLocal // Pass callback for sync update
+      updateTrajectoryLocal
   );
 
   // 5. Flight Plan Hook
@@ -131,6 +134,21 @@ const MapSession = ({ sessionId, sessionName, onIconClick, onAtcClick, onMapRead
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <div id="map" ref={mapContainer} style={{ width: '100%', height: '100%' }} />
+      <SearchWidget 
+        flightsData={flightsData} 
+        onFlightSelect={(flight) => {
+            if (map.current) {
+                map.current.flyTo({ 
+                    center: [flight.longitude, flight.latitude], 
+                    zoom: 12,
+                    essential: true 
+                });
+                setSelectedFlightId(flight.flightId);
+                // Optionally call onIconClick to open the sidebar directly
+                if (onIconClick) onIconClick(flight);
+            }
+        }} 
+      />
       <ZuluClock />
     </div>
   );

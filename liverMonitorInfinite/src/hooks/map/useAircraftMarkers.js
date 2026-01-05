@@ -2,20 +2,19 @@ import maplibregl from "maplibre-gl";
 import { useEffect, useRef } from 'react';
 import staffData from '../../components/staff.json';
 import stremerData from '../../components/Stremer.json';
+import { DEFAULT_COLORS, getIconUrl } from '../../utils/iconTemplates';
+import { useAircraftDefinitions } from '../useAircraftDefinitions';
 
-// Shared constant or passed as prop? 
-// Ideally passed or defined here if not used elsewhere.
-// But mapSession uses them. Better to keep imports here.
-
-import { useAircraftDefinitions } from '../useAircraftDefinitions'; // Import Hook
-
-export const useAircraftMarkers = (map, flightsData, onIconClick, savedUsername, savedVAName, removePolylines, setSelectedFlightId, updateTrajectory, onMarkerUpdate) => {
+export const useAircraftMarkers = (map, flightsData, onIconClick, savedUsername, savedVAName, savedColors, removePolylines, setSelectedFlightId, updateTrajectory, onMarkerUpdate) => {
     const markers = useRef({});
-    const flightsRef = useRef(new Map()); // Map<flightId, { startLng, startLat, endLng, endLat, startTime, duration, heading }>
+    const flightsRef = useRef(new Map()); 
     const animationFrameRef = useRef();
 
     // Fetch Aircraft Definitions
     const { data: aircraftDefinitions } = useAircraftDefinitions();
+    
+    // Merge colors
+    const userColors = { ...DEFAULT_COLORS, ...savedColors };
 
     // 1. Manage Markers and Flight Data Sync
     useEffect(() => {
@@ -25,7 +24,6 @@ export const useAircraftMarkers = (map, flightsData, onIconClick, savedUsername,
         const now = Date.now();
 
         flightsData.forEach(flight => {
-             // ... (Keep existing logic)
              activeIds.add(flight.flightId);
              
              // 1. Maintain Flight Data for Animation
@@ -69,49 +67,60 @@ export const useAircraftMarkers = (map, flightsData, onIconClick, savedUsername,
                 const streamer = stremerData.find(st => st.username === username);
                 const isStaff = staffData.some(staff => staff.username === username);
                 
-                // Determine Category
-                const category = aircraftDefinitions ? aircraftDefinitions[aircraftId] : 'Medium'; // Default to Medium
+                const category = aircraftDefinitions ? aircraftDefinitions[aircraftId] : 'Medium'; 
 
-                el.className = 'airplane-icon smooth-marker'; 
+                // Determine Icon Type and Base Color
+                let iconType = 'A320'; 
+                let iconColor = userColors.groundColor; 
+                let sizeClass = 'airplane-icon'; 
 
-                // Prioridade de Ícones
-                if (!username || username === null) {
-                  // User desconhecido? Usa lógica de avião
-                  if (category === 'Large') el.className += ' large-aircraft-icon';
-                  else if (category === 'Fighter') el.className += ' fighter-aircraft-icon';
-                  else if (category === 'GE') el.className += ' custom-aircraft-icon';
-                  else el.className += ' airplane-icon'; // Default Medium
+                // 1. Determine Icon Type
+                if (category === 'Large') { iconType = 'B77W'; sizeClass = 'large-aircraft-icon'; }
+                else if (category === 'Fighter') { iconType = 'F16'; sizeClass = 'fighter-aircraft-icon'; }
+                else if (category === 'MilitaryTransport') { iconType = 'C130'; sizeClass = 'military-cargo-icon'; }
+                else if (category === 'GE') { iconType = 'C172'; sizeClass = 'custom-aircraft-icon'; } 
+                else { iconType = 'A320'; sizeClass = 'airplane-icon'; } 
+
+                // 2. Determine Color Priority
+                if (!username) {
+                     if (category === 'MilitaryTransport' || category === 'Fighter') iconColor = userColors.militaryColor;
+                     else iconColor = userColors.groundColor;
                 } else if (username === savedUsername) {
-                  el.className += ' special-airplane-icon';
+                    iconColor = userColors.myColor;
                 } else if (virtualOrganization && virtualOrganization === savedVAName) {
-                  el.className += ' va-airplane-icon';
+                    iconColor = userColors.vaColor;
                 } else if (streamer && (streamer.twitch || streamer.youtube)) {
-                  el.className += ' online-airplane-icon';
+                    iconColor = userColors.streamerColor;
+                    el.className = 'airplane-icon smooth-marker online-airplane-icon'; 
                 } else if (isStaff) {
-                  // Staff Dynamic Icons based on Category
-                  if (category === 'Large' || category === 'MilitaryTransport') el.className += ' staff-large-icon';
-                  else if (category === 'GE') el.className += ' staff-ge-icon';
-                  else el.className += ' staff-medium-icon'; // Default for Medium & Fighter
+                    iconColor = userColors.staffColor;
                 } else {
-                  // Usuário normal -> Lógica de tamanho de aeronave
-                  if (category === 'Large') {
-                      el.className += ' large-aircraft-icon';
-                  } else if (category === 'MilitaryTransport') {
-                      el.className += ' military-cargo-icon';
-                  } else if (category === 'Fighter') {
-                      el.className += ' fighter-aircraft-icon';
-                  } else if (category === 'GE') {
-                      el.className += ' custom-aircraft-icon'; // Maps to airplane_ge.png in CSS
-                  } else {
-                      el.className += ' airplane-icon'; // Default (Medium / User)
-                  }
+                    // Normal User
+                    if (category === 'MilitaryTransport' || category === 'Fighter') {
+                        iconColor = userColors.militaryColor;
+                    } else {
+                        iconColor = userColors.groundColor; 
+                    }
                 }
+
+                // 3. Apply Style
+                // Reset class but keep marker base and size
+                // Note: 'smooth-marker' is for transitions? css says 'smooth-marker' -> transition: transform...
+                if (!el.className.includes('smooth-marker')) el.className = 'airplane-icon smooth-marker';
+                
+                el.className += ` ${sizeClass}`;
+                
+                // Generate Dynamic Icon URL
+                const iconUrl = getIconUrl(iconType, iconColor);
+                el.style.backgroundImage = `url('${iconUrl}')`;
+                el.style.backgroundSize = 'contain';
+                el.style.backgroundRepeat = 'no-repeat';
+                el.style.backgroundPosition = 'center';
 
                 // Interaction
                 el.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    // Callbacks from parent to handle selection
-                    if (removePolylines) removePolylines(); // Safe validation
+                    if (removePolylines) removePolylines();
                     if (onIconClick) onIconClick(flight);
                     if (setSelectedFlightId) setSelectedFlightId(flight.flightId);
                     if (updateTrajectory) updateTrajectory(flight); 
@@ -140,7 +149,7 @@ export const useAircraftMarkers = (map, flightsData, onIconClick, savedUsername,
             }
         }
 
-    }, [flightsData, onIconClick, map, savedUsername, savedVAName, removePolylines, setSelectedFlightId, updateTrajectory]);
+    }, [flightsData, onIconClick, map, savedUsername, savedVAName, savedColors, removePolylines, setSelectedFlightId, updateTrajectory]);
 
     // 2. Animation Loop
     const animate = () => {
@@ -153,18 +162,15 @@ export const useAircraftMarkers = (map, flightsData, onIconClick, savedUsername,
             let progress = (now - data.startTime) / data.duration;
             if (progress > 1) progress = 1;
 
-            // Simple Lerp
             const lng = data.startLng + (data.endLng - data.startLng) * progress;
             const lat = data.startLat + (data.endLat - data.startLat) * progress;
 
             data.currentLng = lng;
             data.currentLat = lat;
 
-            // Update Marker
             marker.setLngLat([lng, lat]);
             marker.setRotation(data.heading);
             
-            // Callback for trajectory update
             if (onMarkerUpdate) {
                 onMarkerUpdate(flightId, lng, lat);
             }
@@ -176,7 +182,7 @@ export const useAircraftMarkers = (map, flightsData, onIconClick, savedUsername,
     useEffect(() => {
         animationFrameRef.current = requestAnimationFrame(animate);
         return () => cancelAnimationFrame(animationFrameRef.current);
-    }, [onMarkerUpdate]); // Re-bind if callback changes
+    }, [onMarkerUpdate]); 
     
     return { markers, flightsRef }; 
 };

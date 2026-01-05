@@ -18,16 +18,16 @@ html, body {
 
 /* MapSession.css */
 .airplane-icon {
-    width: 32px;
-    height: 32px;
-    background-image: url('../assets/airplane.png'); /* URL do ícone */
+    width: 70px;
+    height: 70px;
+    background-image: url('../assets/A320.svg'); /* URL do ícone */
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    transform-origin: center center; /* Rotaciona em torno do centro */
-    display: inline-block; /* Assegurar que é um bloco inline para a rotação */
-    
+    transform-origin: center center;
+    display: inline-block;
 }
+
 
 .zulu-clock {
     position: absolute;
@@ -41,6 +41,74 @@ html, body {
     z-index: 1000;
 }
 
+  
+  .military-cargo-icon {
+    background-image: url('../assets/C130.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 70px;
+    height: 70px;
+    transform-origin: center center;
+    display: inline-block;
+  }
+
+  .fighter-aircraft-icon {
+    background-image: url('../assets/F16.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 40px;
+    height: 40px;
+    transform-origin: center center;
+    display: inline-block;
+  }
+
+  /* Staff Military */
+  .staff-cargo-icon {
+    background-image: url('../assets/C130_Staff.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 70px;
+    height: 70px;
+    transform-origin: center center;
+    display: inline-block;
+  }
+
+  .staff-fighter-icon {
+    background-image: url('../assets/F16_Staff.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 40px;
+    height: 40px;
+    transform-origin: center center;
+    display: inline-block;
+  }
+
+  /* VA Military */
+  .va-cargo-icon {
+    background-image: url('../assets/C130_VA.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 70px;
+    height: 70px;
+    transform-origin: center center;
+    display: inline-block;
+  }
+
+  .va-fighter-icon {
+    background-image: url('../assets/F16_VA.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 40px;
+    height: 40px;
+    transform-origin: center center;
+    display: inline-block;
+  }
   
   .special-airplane-icon {
     background-image: url('../assets/airplane.png');
@@ -77,10 +145,14 @@ html, body {
   }
 
   .custom-aircraft-icon {
-    background-image: url('../assets/06.png'); /* Ícone para usuários staff */
-    background-size: cover;
-    width: 18px;
-    height: 18px;
+    background-image: url('../assets/C172.svg'); /* Ícone para usuários staff */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 25px;
+    height: 25px;
+    transform-origin: center center;
+    display: inline-block;
   }
 
   .santa-marker-icon {
@@ -97,12 +169,16 @@ html, body {
       cursor: pointer;
   }
 
-  .large-aircraft-icon {
-    background-image: url('../assets/A225.png');
-    background-size: cover;
-    width: 32px; /* Slightly larger for widebodies */
-    height: 32px;
-  }
+.large-aircraft-icon {
+    background-image: url('../assets/B77W.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 40px;
+    height: 40px;
+    transform-origin: center center;
+    display: inline-block;
+}
 
   .fighter-aircraft-icon {
     background-image: url('../assets/04.png');
@@ -113,24 +189,104 @@ html, body {
 
   /* Staff Variants */
   .staff-ge-icon {
-    background-image: url('../assets/staff_ge.png');
-    background-size: cover;
-    width: 20px;
-    height: 20px;
+    background-image: url('../assets/C172_Staff.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 25px;
+    height: 25px;
+    transform-origin: center center;
+    display: inline-block;
   }
 
   .staff-medium-icon {
-    background-image: url('../assets/staff_medio.png');
-    background-size: cover;
-    width: 30px;
-    height: 30px;
+    background-image: url('../assets/A320_Staff.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 70px;
+    height: 70px;
+    transform-origin: center center;
+    display: inline-block;
   }
 
   .staff-large-icon {
-    background-image: url('../assets/staff_grande.png');
-    background-size: cover;
-    width: 36px;
-    height: 36px;
+    background-image: url('../assets/B77W_Staff.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 40px;
+    height: 40px;
+    transform-origin: center center;
+    display: inline-block;
+  }
+
+  /* VA Variants (#7c0eea) */
+  .va-ge-icon {
+    background-image: url('../assets/C172_VA.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 40px;
+    height: 40px;
+    transform-origin: center center;
+    display: inline-block;
+  }
+
+  .va-medium-icon {
+    background-image: url('../assets/A320_VA.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 70px;
+    height: 70px;
+    transform-origin: center center;
+    display: inline-block;
+  }
+
+  .va-large-icon {
+    background-image: url('../assets/B77W_VA.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 40px;
+    height: 40px;
+    transform-origin: center center;
+    display: inline-block;
+  }
+
+  /* IFC Variants (#eac51c) */
+  .ifc-ge-icon {
+    background-image: url('../assets/C172_IFC.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 40px;
+    height: 40px;
+    transform-origin: center center;
+    display: inline-block;
+  }
+
+  .ifc-medium-icon {
+    background-image: url('../assets/A320_IFC.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 70px;
+    height: 70px;
+    transform-origin: center center;
+    display: inline-block;
+  }
+
+  .ifc-large-icon {
+    background-image: url('../assets/B77W_IFC.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 70px;
+    height: 70px;
+    transform-origin: center center;
+    display: inline-block;
   }
 
   .military-cargo-icon {

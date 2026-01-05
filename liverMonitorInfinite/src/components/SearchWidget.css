@@ -1,0 +1,167 @@
+/* src/components/SearchWidget.css */
+.search-widget-container {
+    position: absolute;
+    top: 10px; /* Exact match with ZuluClock top: 10px */
+    right: 150px; /* Spacing from ZuluClock */
+    z-index: 1000;
+    width: 280px; /* Increased from 250px to fit more text */
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+.search-input-wrapper {
+    position: relative;
+    width: 100%;
+    height: 32px; /* Adjusted height to match ZuluClock padding/text rhythm closer */
+    background: rgba(18, 18, 18, 0.85); 
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px; 
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+.search-input-wrapper:focus-within {
+    border-color: #7986CB;
+    background: rgba(18, 18, 18, 0.95);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
+}
+
+.search-icon {
+    color: #a0a0a0;
+    margin-right: 8px;
+    font-size: 0.8rem;
+}
+
+.search-input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 0.85rem;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+}
+
+.search-input::placeholder {
+    color: #888;
+    font-size: 0.8rem;
+}
+
+/* Results Dropdown */
+.search-results-dropdown {
+    position: absolute;
+    top: 40px; 
+    left: 0;
+    width: 100%;
+    background: rgba(25, 25, 25, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    animation: fadeIn 0.15s ease-out;
+}
+
+.search-result-item {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background: rgba(121, 134, 203, 0.2); 
+}
+
+/* Typography inside results */
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.result-username {
+    font-weight: 600;
+    color: #e0e0e0;
+    font-size: 0.9rem;
+}
+
+.result-aircraft {
+    color: #9FA8DA; 
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.result-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #aaa;
+    margin-top: 2px;
+}
+
+.result-route-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1; /* Take up remaining space */
+    margin-right: 8px; /* Space before stats */
+    color: #ccc;
+    font-size: 0.75rem;
+}
+
+
+.result-stats {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0; /* Protect stats from shrinking */
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+/* Scrollbar */
+.search-results-dropdown::-webkit-scrollbar {
+    width: 5px;
+}
+
+.search-results-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.search-results-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.search-results-dropdown::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
