@@ -7,7 +7,7 @@ import defaultImage from "../assets/ovni.png"; // Imagem padrão
 import ApiService from './ApiService'; // Importe o objeto ApiService
 import getAircraft from "./GetAircraft.json";
 import liveries from "./ImageAirplane.json";
-import staffList from "./Staff.json";
+import staffList from "./staff.json";
 import stremeruser from "./Stremer.json";
 import "./UserInfoSidebar.css";
 
@@ -109,6 +109,14 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
   };
 
 
+  // State for static route data
+  const [routeInfo, setRouteInfo] = useState({
+      startLocation: null,
+      endLocation: null,
+      totalDistance: null
+  });
+
+  // 1. Fetch Flight Plan (Run only when ID changes)
   useEffect(() => {
     const fetchFlightPlan = async () => {
       try {
@@ -118,39 +126,22 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
         if (data && data.result && data.result.flightPlanItems) {
           const flightPlanItems = data.result.flightPlanItems;
           if (flightPlanItems.length > 0) {
-            const startLocation = flightPlanItems[0].location;
-            const endLocation = flightPlanItems[flightPlanItems.length - 1].location;
+            const start = flightPlanItems[0].location;
+            const end = flightPlanItems[flightPlanItems.length - 1].location;
 
-            const totalDistance = calculateDistance(
-              startLocation.latitude,
-              startLocation.longitude,
-              endLocation.latitude,
-              endLocation.longitude
+            const totalDist = calculateDistance(
+              start.latitude,
+              start.longitude,
+              end.latitude,
+              end.longitude
             );
 
-            setTotalDistance(totalDistance);
-
-            const distance = calculateDistance(
-              flightData.latitude,
-              flightData.longitude,
-              endLocation.latitude,
-              endLocation.longitude
-            );
-            setDistanceToDestination(distance.toFixed(0));
-
-            // Ajuste da função progress para ser igual ao primeiro código
-            const progress = ((totalDistance - distance) / totalDistance) * 100;
-            setProgress(progress);
-
-            const speedInKnots = flightData.speed;
-            const timeRemainingHours = distance / speedInKnots;
-            const etaZuluTime = new Date(Date.now() + timeRemainingHours * 3600000);
-
-            setEtaZulu(etaZuluTime.toISOString().split("T")[1].substring(0, 5));
-
-            const localTimeOffset = etaZuluTime.getTimezoneOffset() * 60000;
-            const etaLocalTime = new Date(etaZuluTime.getTime() - localTimeOffset);
-            setEtaLocal(etaLocalTime.toISOString().split("T")[1].substring(0, 5));
+            setRouteInfo({
+                startLocation: start,
+                endLocation: end,
+                totalDistance: totalDist
+            });
+            setTotalDistance(totalDist); // Keep legacy state if needed, or rely on routeInfo
           }
         }
 
@@ -167,10 +158,60 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
       }
     };
 
-    if (flightData && sessionId) {
+    if (flightData.flightId && sessionId) {
+      // Reset critical states on new flight
+      setRouteInfo({ startLocation: null, endLocation: null, totalDistance: null });
+      setDistanceToDestination(null);
+      setEtaZulu("N/A");
+      setEtaLocal("N/A");
+      setProgress(0);
+      
       fetchFlightPlan();
     }
-  }, [flightData, sessionId]);
+  }, [flightData.flightId, sessionId]);
+
+  // 2. Real-time Calculations (Run when flightData updates)
+  useEffect(() => {
+     if (!routeInfo.endLocation || !routeInfo.totalDistance) return;
+
+     const { endLocation, totalDistance } = routeInfo;
+
+     // Calculate Distance to Destination
+     const distance = calculateDistance(
+        flightData.latitude,
+        flightData.longitude,
+        endLocation.latitude,
+        endLocation.longitude
+      );
+      setDistanceToDestination(distance.toFixed(0));
+
+      // Calculate Progress
+      // Ensure we don't divide by zero or get negative progress
+      let currentProgress = 0;
+      if (totalDistance > 0) {
+          currentProgress = ((totalDistance - distance) / totalDistance) * 100;
+      }
+      // Clamp progress between 0 and 100
+      currentProgress = Math.max(0, Math.min(100, currentProgress));
+      setProgress(currentProgress);
+
+      // Calculate ETA
+      const speedInKnots = flightData.speed;
+      if (speedInKnots > 10) { // Avoid division by zero or huge times when stopped
+        const timeRemainingHours = distance / speedInKnots;
+        const etaZuluTime = new Date(Date.now() + timeRemainingHours * 3600000);
+
+        setEtaZulu(etaZuluTime.toISOString().split("T")[1].substring(0, 5));
+
+        const localTimeOffset = etaZuluTime.getTimezoneOffset() * 60000;
+        const etaLocalTime = new Date(etaZuluTime.getTime() - localTimeOffset);
+        setEtaLocal(etaLocalTime.toISOString().split("T")[1].substring(0, 5));
+      } else {
+          setEtaZulu("--:--");
+          setEtaLocal("--:--");
+      }
+
+  }, [flightData, routeInfo]);
 
   useEffect(() => {
     const aircraft = getAircraft.result.find((a) => a.id === flightData.aircraftId);

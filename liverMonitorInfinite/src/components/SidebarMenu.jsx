@@ -41,8 +41,11 @@ const SidebarMenu = () => {
   const [userSidebarVisible, setUserSidebarVisible] = useState(false);
   const [atcSidebarVisible, setAtcSidebarVisible] = useState(false);
   const [pilotsSidebarVisible, setPilotsSidebarVisible] = useState(false);
-  const [selectedFlight, setSelectedFlight] = useState(null);
+  const [selectedFlightId, setSelectedFlightId] = useState(null);
   const [selectedAtc, setSelectedAtc] = useState(null);
+
+  // Derive selected flight from live data
+  const selectedFlight = flightsData ? flightsData.find(f => f.flightId === selectedFlightId) : null;
   
   const userSidebarRef = useRef(null);
   const atcSidebarRef = useRef(null);
@@ -54,7 +57,7 @@ const SidebarMenu = () => {
   };
 
   const handleMapIconClick = (flight) => {
-    setSelectedFlight(flight);
+    setSelectedFlightId(flight.flightId);
     setUserSidebarVisible(true);
     setAtcSidebarVisible(false);
     setSidebarVisible(false); 
@@ -70,7 +73,7 @@ const SidebarMenu = () => {
   };
 
   const handleSelectPilot = (flight) => {
-      setSelectedFlight(flight);
+      setSelectedFlightId(flight.flightId);
       setUserSidebarVisible(true);
       setPilotsSidebarVisible(false); 
       setSidebarVisible(false);
@@ -214,7 +217,7 @@ const SidebarMenu = () => {
                    flightsData={flightsData}
                    onSelectFlight={handleSelectPilot}
                    onClose={togglePilotsSidebar} 
-                   selectedFlightId={selectedFlight ? selectedFlight.flightId : null}
+                   selectedFlightId={selectedFlightId}
                /> 
            )}
 

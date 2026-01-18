@@ -11,7 +11,7 @@ export const useFlights = (sessionId, enabled = true) => {
         return flights;
     },
     enabled: !!sessionId && enabled,
-    refetchInterval: 30000, // 30 seconds polling as per original code
-    staleTime: 20000, 
+    refetchInterval: 5000, 
+    staleTime: 3000, 
   });
 };

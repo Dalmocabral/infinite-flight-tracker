@@ -8,7 +8,7 @@ export const useAtc = (sessionId, enabled = true) => {
         return await ApiService.getAtcData(sessionId);
     },
     enabled: !!sessionId && enabled,
-    refetchInterval: 60000, // ATC changes less frequently, 60s is good
-    staleTime: 50000,
+    refetchInterval: 20000, 
+    staleTime: 15000,
   });
 };
