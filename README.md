@@ -1,94 +1,108 @@
 # ✈️ LiveFlight Monitor - Infinite Flight Tracker
 
-A fast, modern flight tracking application for the Infinite Flight Simulator. Built with React and MapLibre GL to provide smooth, real-time visualization of global traffic and ATC operations.
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black) ![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black) ![MapLibre GL JS](https://img.shields.io/badge/MapLibre%20GL%20JS-000000?style=for-the-badge&logo=mapbox&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-## ✨ Features
+## 🌟 Visão Geral do Projeto
 
-- **Live Global Map**: Visualize all active flights and ATC control zones in real-time.
-- **Smooth Animations**: High-performance JavaScript-based interpolation (`requestAnimationFrame`) for gapless aircraft movement.
-- **Detailed Flight Info**: Click any aircraft to see:
-    -   Real-time telemetry (Altitude, Speed, Heading).
-    -   Flight Plan Trajectory (Colored by altitude).
-    -   Pilot & Organization details.
-- **ATC Integration**: 
-    -   Visual boundaries for FIRs (Flight Information Regions).
-    -   Interactive ATC zones (Tower, Approach, Departure).
-    -   Sidebar with ATIS, NOTAMs, and Traffic counts.
-- **Robust Search**: Filter flights by Username, Callsign, or Virtual Airline.
-- **Persisted User Settings**: Saves your map preferences (Zoom, Center) and filters automatically.
+O **LiveFlight Monitor - Infinite Flight Tracker** é uma aplicação web rápida e moderna, desenvolvida para proporcionar o rastreamento em tempo real de voos e operações de controle de tráfego aéreo (ATC) no simulador *Infinite Flight*. Construído com **React** e **MapLibre GL JS**, este projeto oferece uma visualização fluida e interativa do tráfego global, destacando-se pela sua performance e experiência de usuário.
 
-## 🛠️ Technology Stack
+## ✨ Funcionalidades Principais
 
-- **Frontend**: React 18, Vite
-- **Mapping**: MapLibre GL JS, MapTiler
-- **State & Data**: `@tanstack/react-query`, Axios
-- **Code Structure**: Functional Components & Custom Hooks
+Esta aplicação foi projetada com um conjunto robusto de funcionalidades para enriquecer a experiência de monitoramento de voos:
 
-## 🚀 Getting Started
+*   **Mapa Global Interativo**: Visualize em tempo real todos os voos ativos e as zonas de controle ATC em um mapa global dinâmico.
+*   **Animações Suaves**: Desfrute de movimentos de aeronaves sem interrupções, graças à interpolação baseada em JavaScript de alta performance (`requestAnimationFrame`).
+*   **Informações Detalhadas de Voo**: Ao clicar em qualquer aeronave, acesse dados em tempo real, incluindo:
+    *   Telemetria (Altitude, Velocidade, Rumo).
+    *   Trajetória do Plano de Voo (colorida por altitude).
+    *   Detalhes do Piloto e da Organização.
+*   **Integração ATC Avançada**:
+    *   Visualização de limites para FIRs (Regiões de Informação de Voo).
+    *   Zonas ATC interativas (Torre, Aproximação, Partida).
+    *   Barra lateral com ATIS, NOTAMs e contagem de tráfego.
+*   **Pesquisa Robusta**: Filtre voos por Nome de Usuário, Callsign ou Companhia Aérea Virtual, facilitando a localização de informações específicas.
+*   **Configurações de Usuário Persistentes**: Suas preferências de mapa (Zoom, Centro) e filtros são salvas automaticamente, proporcionando uma experiência personalizada a cada uso.
 
-### Prerequisites
+## 🛠️ Pilha Tecnológica
 
-- Node.js (v18+)
-- API Key for Infinite Flight (or mock data)
-- API Key for MapTiler (free tier available)
+O projeto `LiveFlight Monitor` demonstra o uso de tecnologias modernas e eficientes para o desenvolvimento de aplicações web de alto desempenho:
 
-### Installation
+*   **Frontend**: Desenvolvido com **React 18** para uma interface de usuário reativa e modular, utilizando **Vite** para um ambiente de desenvolvimento rápido e otimizado.
+*   **Mapeamento**: Implementado com **MapLibre GL JS** para renderização de mapas vetoriais e **MapTiler** para dados de mapa, garantindo visualizações detalhadas e personalizáveis.
+*   **Gerenciamento de Estado e Dados**: Utiliza `@tanstack/react-query` para gerenciamento eficiente de estado assíncrono e `Axios` para comunicação com APIs.
+*   **Estrutura de Código**: Adota componentes funcionais e *Custom Hooks* para uma arquitetura limpa, reutilizável e de fácil manutenção.
 
-1.  **Clone the repository**
+## 🚀 Como Começar
+
+Para configurar e executar o projeto em seu ambiente local, siga as instruções abaixo:
+
+### Pré-requisitos
+
+Certifique-se de ter as seguintes ferramentas instaladas:
+
+*   Node.js (versão 18 ou superior)
+*   Chave de API para Infinite Flight (ou dados simulados para desenvolvimento)
+*   Chave de API para MapTiler (disponível no plano gratuito)
+
+### Instalação
+
+1.  **Clone o repositório**:
+
     ```bash
-    git clone https://github.com/your-username/liveflight-monitor.git
-    cd liverMonitorInfinite
+    git clone https://github.com/Dalmocabral/liveflight-monitor.git
+    cd liveflight-monitor
     ```
 
-2.  **Install Dependencies**
+2.  **Instale as dependências**:
+
     ```bash
     npm install
     ```
 
-3.  **Environment Setup**
-    Create a `.env` file in the root directory:
-    ```env
-    VITE_API_KEY=your_infinite_flight_api_key
-    VITE_MAPTILER_KEY=your_maptiler_key
+3.  **Configuração do Ambiente**: Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+
+    ```dotenv
+    VITE_API_KEY=sua_chave_api_infinite_flight
+    VITE_MAPTILER_KEY=sua_chave_maptiler
     ```
 
-4.  **Run Development Server**
+4.  **Execute o Servidor de Desenvolvimento**:
+
     ```bash
     npm run dev
     ```
 
-## 🏗️ Architecture
+## 🏗️ Arquitetura
 
-The application recently underwent a major refactoring (Dec 2025) to modularize the map logic into specialized hooks.
+A aplicação passou por uma refatoração significativa em Dezembro de 2025, com o objetivo de modularizar a lógica do mapa em *hooks* especializados, promovendo maior organização e reusabilidade do código.
 
-### Core Hooks (`src/hooks/map/`)
+### Hooks Principais (`src/hooks/map/`)
 
-- **`useMap.js`**:
-    -   Initializes the MapLibre instance.
-    -   Manages local storage persistence for Zoom/Center.
-    -   Handles map resize events.
+*   **`useMap.js`**:
+    *   Responsável pela inicialização da instância do MapLibre.
+    *   Gerencia a persistência de configurações de Zoom e Centro no armazenamento local.
+    *   Lida com eventos de redimensionamento do mapa.
+*   **`useAircraftMarkers.js`**:
+    *   O "motor" da visualização, sincronizando o estado do React com os marcadores do MapLibre.
+    *   Executa o loop de animação a 60fps para interpolação suave das posições das aeronaves.
+*   **`useTrajectory.js`**:
+    *   Busca dados do plano de voo e lida com o desenrolar de coordenadas (atravessando a Linha Internacional de Data).
+    *   Renderiza a linha de trajetória colorida por altitude.
+*   **`useAtcLayer.js`**:
+    *   Busca limites globais de ATC (GeoJSON).
+    *   Renderiza polígonos FIR e círculos de fallback para ATC local.
+    *   Gerencia a interação de clique para a barra lateral de informações ATC.
 
-- **`useAircraftMarkers.js`**:
-    -   The "engine" of the visualization.
-    -   Syncs React state with MapLibre markers.
-    -   Runs the 60fps animation loop to interpolate positions.
+### Estrutura de Componentes
 
-- **`useTrajectory.js`**:
-    -   Fetches flight plan data.
-    -   Handles coordinate unwrapping (Dateline crossing).
-    -   Renders the altitude-colored path line.
+*   **`MapSession.jsx`**: O componente principal que coordena a composição dos *hooks* acima.
+*   **`SidebarMenu.jsx`**: Gerencia as sobreposições da interface do usuário e a funcionalidade de pesquisa.
+*   **`AtcInfoSidebar.jsx`**: Exibe informações detalhadas do controlador ATC.
 
-- **`useAtcLayer.js`**:
-    -   Fetches global ATC boundaries (GeoJSON).
-    -   Render FIR polygons and fallback circles for local ATC.
-    -   Handles click interaction for the ATC Sidebar.
+## 📧 Contato
 
-### Component Structure
-
-- **`MapSession.jsx`**: The main coordinator that composes the hooks above.
-- **`SidebarMenu.jsx`**: Manages the UI overlays and Search.
-- **`AtcInfoSidebar.jsx`**: Displays detailed controller info.
+Para dúvidas, sugestões ou colaborações, sinta-se à vontade para entrar em contato através do meu perfil no GitHub ou outras redes sociais. Estou sempre aberto a novas ideias e aprendizados!
 
 ---
 
-*Verified & Tested (Dec 2025)*
+*Desenvolvido com paixão por Dalmo dos Santos Cabral.*
