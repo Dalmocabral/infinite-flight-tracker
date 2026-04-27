@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import ApiService from '../components/ApiService';
+import { useIdleTimeout } from './useIdleTimeout';
 
 export const useAirportStatus = (sessionId) => {
+  const isIdle = useIdleTimeout();
+
   return useQuery({
     queryKey: ['airportStatus', sessionId],
     queryFn: async () => {
@@ -10,7 +13,7 @@ export const useAirportStatus = (sessionId) => {
         console.log("World Status Data:", data);
         return data;
     },
-    enabled: !!sessionId,
+    enabled: !!sessionId && !isIdle,
     refetchInterval: 60000, 
     staleTime: 30000,
   });
