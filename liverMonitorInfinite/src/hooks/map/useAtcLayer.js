@@ -6,6 +6,7 @@ const OPENAIP_URL = 'https://api.core.openaip.net/api/airspaces';
 
 export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) => {
     const [boundariesGeoJson, setBoundariesGeoJson] = useState(null);
+    const [traconsGeoJson, setTraconsGeoJson] = useState(null);
     const atcDataRef = useRef(atcData); 
     const openAipCache = useRef(new Map()); // Cache for OpenAIP features: ICAO -> Feature
     const fetchingSet = useRef(new Set());  // Track in-flight requests
@@ -15,14 +16,18 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
         atcDataRef.current = atcData;
     }, [atcData]);
 
-    // Fetch VATSpy GeoJSON once
+    // Fetch VATSpy and Tracons GeoJSON once
     useEffect(() => {
         const fetchBoundaries = async () => {
           try {
-            const response = await axios.get(GEOJSON_URL);
-            setBoundariesGeoJson(response.data);
+            const [respFIR, respTracon] = await Promise.all([
+                axios.get(GEOJSON_URL),
+                axios.get('/data/Tracons.geojson') // Local merged file
+            ]);
+            setBoundariesGeoJson(respFIR.data);
+            setTraconsGeoJson(respTracon.data);
           } catch (error) {
-            console.error("Erro ao carregar Boundaries.geojson:", error);
+            console.error("Erro ao carregar arquivos GeoJSON de limites:", error);
           }
         };
         fetchBoundaries();
@@ -50,12 +55,13 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
                 source: 'atc-boundaries',
                 paint: {
                     'fill-color': ['get', 'color'],
-                    'fill-opacity': 0.15
+                    'fill-opacity': 0.25
                 },
                 filter: ['match', ['get', 'type'], ['STAR'], false, true] // Render everything EXCEPT STAR
             });
         } else {
              map.current.setFilter('atc-fill', ['match', ['get', 'type'], ['STAR'], false, true]);
+             map.current.setPaintProperty('atc-fill', 'fill-color', ['get', 'color']);
         }
 
         // Layer: ATC Outline
@@ -66,12 +72,13 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
                 source: 'atc-boundaries',
                 paint: {
                     'line-color': ['get', 'color'],
-                    'line-width': 1
+                    'line-width': 3
                 },
                 filter: ['match', ['get', 'type'], ['STAR'], false, true]
             });
         } else {
              map.current.setFilter('atc-outline', ['match', ['get', 'type'], ['STAR'], false, true]);
+             map.current.setPaintProperty('atc-outline', 'line-color', ['get', 'color']);
         }
 
         // Layer: STAR Fill
@@ -202,20 +209,56 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
                   6: 1  // Bottom
               };
       
-              // 1. VATSpy Data (Priority)
-              if (boundariesGeoJson) {
+              // 1. VATSpy & SimAware Data (Priority)
+              if (boundariesGeoJson || traconsGeoJson) {
                    const activeIcaos = activeAtc.map(a => a.airportName);
-                   const matchedFeatures = boundariesGeoJson.features.filter(feature => {
-                       return activeIcaos.includes(feature.properties.id); 
-                   });
+                   
+                   const matchedFeatures = [];
+                   const matchedIcaos = new Set(); // Keep track of the actual ICAOs we matched
+                   
+                   // Helper to check fuzzy match
+                   const isMatch = (icao, featId) => {
+                       if (featId === icao) return true;
+                       if (featId.startsWith(icao + '_')) return true;
+                       if (icao.length === 4 && (icao.startsWith('K') || icao.startsWith('P')) && icao.substring(1) === featId) return true;
+                       return false;
+                   };
+
+                   // Match FIRs (Centers)
+                   if (boundariesGeoJson) {
+                       const firMatches = boundariesGeoJson.features.filter(feature => {
+                           const matched = activeIcaos.includes(feature.properties.id);
+                           if (matched) matchedIcaos.add(feature.properties.id);
+                           return matched;
+                       });
+                       // Set the originalIcao property for styling later
+                       firMatches.forEach(f => f.properties.originalIcao = f.properties.id);
+                       matchedFeatures.push(...firMatches);
+                   }
+
+                   // Match TRACONs (App/Dep)
+                   if (traconsGeoJson) {
+                       const traconMatches = traconsGeoJson.features.filter(feature => {
+                           const featId = feature.properties.id;
+                           const matchingIcao = activeIcaos.find(icao => isMatch(icao, featId));
+                           if (matchingIcao) {
+                               feature.properties.originalIcao = matchingIcao;
+                               matchedIcaos.add(matchingIcao);
+                               return true;
+                           }
+                           return false;
+                       });
+                       matchedFeatures.push(...traconMatches);
+                   }
                    
                    const styledMatched = matchedFeatures.map(f => {
-                       const original = activeAtc.find(a => a.airportName === f.properties.id);
+                       const original = activeAtc.find(a => a.airportName === f.properties.originalIcao);
                        const atcType = original ? original.type : 6;
                        return {
                            ...f,
                            properties: { 
                                ...f.properties, 
+                               id: f.properties.originalIcao, // Override ID so clicks work!
                                color: '#0050b3', 
                                className: 'FIR', 
                                source: 'VATSpy',
@@ -226,9 +269,10 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
                    
                    allFeatures = [...styledMatched];
       
-                   const matchedIds = matchedFeatures.map(f => f.properties.id);
                    activeAtc.forEach(atc => {
-                       if (!matchedIds.includes(atc.airportName)) {
+                       // Only push to unmatched if it's NOT in the matches 
+                       // AND it's a Center/App/Dep (Ground/Tower are always matched dynamically later)
+                       if (!matchedIcaos.has(atc.airportName) || atc.type === 0 || atc.type === 1) {
                            unmatchedAtc.push(atc);
                        }
                    });
@@ -412,7 +456,7 @@ export const useAtcLayer = (map, atcData, sessionName, isMapLoaded, onAtcClick) 
         };
 
         updateAtcLayer();
-    }, [atcData, boundariesGeoJson, sessionName, isMapLoaded, map]);
+    }, [atcData, boundariesGeoJson, traconsGeoJson, sessionName, isMapLoaded, map]);
 
     // Setup Click Listener
     useEffect(() => {

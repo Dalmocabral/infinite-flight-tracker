@@ -26,9 +26,21 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   return d / 1852; // Retorna a distância em milhas náuticas
 };
 
+// Otimização de Performance: Dicionário O(1) para lookup instantâneo
+const liveryMap = liveries.reduce((acc, livery) => {
+  if (livery.id && livery.image) {
+    acc[livery.id] = livery.image;
+  }
+  return acc;
+}, {});
+
 const getLiveryImage = (liveryId) => {
-  const livery = liveries.find((l) => l.id === liveryId);
-  return livery ? livery.image : defaultImage;
+  const imagePath = liveryMap[liveryId];
+  if (imagePath) {
+    // Remover a barra inicial do JSON e adicionar o BASE_URL correto do Vite
+    return `${import.meta.env.BASE_URL}${imagePath.replace(/^\//, "")}`;
+  }
+  return defaultImage;
 };
 
 const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) => {
@@ -45,6 +57,16 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
   const [progress, setProgress] = useState(0);
   const [airplaneLogos, setAirplaneLogos] = useState([]); // Estado para armazenar os dados da API
   const [chartData, setChartData] = useState([["Time", "Altitude", "Ground Speed"]]); // Dados iniciais para o gráfico
+
+  const [isFlightPlanOpen, setIsFlightPlanOpen] = useState(false);
+
+  const [targetEtaTime, setTargetEtaTime] = useState(null);
+  const [targetTodTime, setTargetTodTime] = useState(null);
+  const [distanceToTodNm, setDistanceToTodNm] = useState(0);
+
+  const [liveArrival, setLiveArrival] = useState("--:--");
+  const [liveTimeToDest, setLiveTimeToDest] = useState("--:--:--");
+  const [liveTimeToTod, setLiveTimeToTod] = useState("--:--:--");
 
   useEffect(() => {
     const fetchRouteData = async () => {
@@ -165,6 +187,9 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
       setEtaZulu("N/A");
       setEtaLocal("N/A");
       setProgress(0);
+      setTargetEtaTime(null);
+      setTargetTodTime(null);
+      setDistanceToTodNm(0);
       
       fetchFlightPlan();
     }
@@ -200,15 +225,32 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
       if (speedInKnots > 10) { // Avoid division by zero or huge times when stopped
         const timeRemainingHours = distance / speedInKnots;
         const etaZuluTime = new Date(Date.now() + timeRemainingHours * 3600000);
+        setTargetEtaTime(etaZuluTime.getTime());
 
         setEtaZulu(etaZuluTime.toISOString().split("T")[1].substring(0, 5));
 
         const localTimeOffset = etaZuluTime.getTimezoneOffset() * 60000;
         const etaLocalTime = new Date(etaZuluTime.getTime() - localTimeOffset);
         setEtaLocal(etaLocalTime.toISOString().split("T")[1].substring(0, 5));
+        
+        // Calculate TOD (Rule of thumb: 3nm per 1000ft)
+        const todDistance = (flightData.altitude / 1000) * 3;
+        const distToTod = Math.max(0, distance - todDistance);
+        setDistanceToTodNm(distToTod);
+        
+        if (distToTod > 0) {
+            const todHours = distToTod / speedInKnots;
+            setTargetTodTime(Date.now() + todHours * 3600000);
+        } else {
+            setTargetTodTime(null);
+        }
+
       } else {
           setEtaZulu("--:--");
           setEtaLocal("--:--");
+          setTargetEtaTime(null);
+          setTargetTodTime(null);
+          setDistanceToTodNm(0);
       }
 
   }, [flightData, routeInfo]);
@@ -217,6 +259,46 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
     const aircraft = getAircraft.result.find((a) => a.id === flightData.aircraftId);
     setAircraftName(aircraft ? aircraft.name : "Unknown Aircraft");
   }, [flightData.aircraftId]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const now = Date.now();
+
+      if (targetEtaTime) {
+          let diffMs = targetEtaTime - now;
+          if (diffMs < 0) diffMs = 0;
+
+          const totalSeconds = Math.floor(diffMs / 1000);
+          const hours = Math.floor(totalSeconds / 3600);
+          const mins = Math.floor((totalSeconds % 3600) / 60);
+          const secs = totalSeconds % 60;
+          setLiveTimeToDest(`${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`);
+
+          const targetDate = new Date(targetEtaTime);
+          const arrHours = String(targetDate.getUTCHours()).padStart(2, '0');
+          const arrMins = String(targetDate.getUTCMinutes()).padStart(2, '0');
+          setLiveArrival(`${arrHours}:${arrMins} Z`);
+      } else {
+          setLiveArrival("--:--");
+          setLiveTimeToDest("--:--:--");
+      }
+
+      if (targetTodTime) {
+          let diffMs = targetTodTime - now;
+          if (diffMs < 0) diffMs = 0;
+
+          const totalSeconds = Math.floor(diffMs / 1000);
+          const hours = Math.floor(totalSeconds / 3600);
+          const mins = Math.floor((totalSeconds % 3600) / 60);
+          const secs = totalSeconds % 60;
+          setLiveTimeToTod(`${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`);
+      } else {
+          setLiveTimeToTod("--:--:--");
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [targetEtaTime, targetTodTime]);
 
   useEffect(() => {
     const fetchUserStatus = async () => {
@@ -306,16 +388,81 @@ const UserInfoSidebar = forwardRef(({ isVisible, flightData, sessionId }, ref) =
           <p>AIRCRAFT</p>
         </div>
       </div>
-      <div className="route-info-user">
-        <span>ROUTE</span>
-        <div className="waypoints-container">
-          {waypoints.map((waypoint, index) => (
-            <span key={index} className="waypoint">
-              {waypoint || "Unknown"}
-              {index < waypoints.length - 1 ? ' ' : ''}
-            </span>
-          ))}
+      <div className="col-info-flight-user" style={{ marginTop: '-12px' }}>
+        
+        <div className="info-box">
+          <span className="live-timer-text">{liveTimeToDest}</span>
+          <p>DEST ({distanceToDestination ? distanceToDestination : 0}nm)</p>
         </div>
+        <div className="info-box">
+          <span className="live-timer-text">{liveTimeToTod}</span>
+          <p>TOD ({distanceToTodNm > 0 ? distanceToTodNm.toFixed(0) : 0}nm)</p>
+        </div>
+      </div>
+      <div className="route-info-user">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <span style={{ marginBottom: 0 }}>ROUTE</span>
+          <button 
+              onClick={() => setIsFlightPlanOpen(!isFlightPlanOpen)}
+              className="btn-toggle-flightplan"
+          >
+              {isFlightPlanOpen ? 'Close Flightplan' : 'Open Flightplan'}
+          </button>
+        </div>
+        
+        {isFlightPlanOpen && flightPlan?.result?.flightPlanItems ? (
+          <div className="flight-plan-table-container">
+            <table className="flight-plan-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Distance</th>
+                        <th>Altitude</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {(() => {
+                        const flattenedItems = [];
+                        flightPlan.result.flightPlanItems.forEach(item => {
+                            if (item.children && item.children.length > 0) {
+                                flattenedItems.push(...item.children);
+                            } else {
+                                flattenedItems.push(item);
+                            }
+                        });
+                        
+                        return flattenedItems.map((item, index, arr) => {
+                            let distance = 0;
+                            if (index > 0) {
+                                const prevItem = arr[index - 1];
+                                distance = calculateDistance(
+                                    prevItem.location.latitude, prevItem.location.longitude,
+                                    item.location.latitude, item.location.longitude
+                                );
+                            }
+                            const alt = item.altitude > 0 ? item.altitude : "";
+                            return (
+                                <tr key={index}>
+                                    <td style={{ color: '#bfdbfe' }}>{item.name || item.identifier || "N/A"}</td>
+                                    <td>{index === 0 ? "0.00" : distance.toFixed(2)}</td>
+                                    <td>{alt}</td>
+                                </tr>
+                            );
+                        });
+                    })()}
+                </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="waypoints-container">
+            {waypoints.map((waypoint, index) => (
+              <span key={index} className="waypoint">
+                {waypoint || "Unknown"}
+                {index < waypoints.length - 1 ? ' ' : ''}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
       <div className="col-info-flight-user">
         <div className="info-box-user">
